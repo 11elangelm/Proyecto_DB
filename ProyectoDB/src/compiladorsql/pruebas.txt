@@ -1,0 +1,62 @@
+drop database prueba3;
+create database prueba3;
+use database prueba3;
+create table carro (tipo int, descripcion char(20) constraint pk1 primary key  (tipo, descripcion));
+create table bmw (tipo int, algo int constraint pk2 foreign key (tipo) references carro (tipo));
+create table bmw (tipo int, algo int constraint check1 CHECK  ( 5 > 4 );
+show tables;
+
+CREATE DATABASE tienda;
+USE DATABASE tienda;
+CREATE TABLE cliente (id int, jtg int, ljro float, oajieo char(2) CONSTRAINT pkCliente PRIMARY KEY  (id));
+
+create table bmw (tipo int, algo int constraint check1 check ((5<4) and (5>4)));
+
+insert into gt values (12,1.3,-4,'1234-12-12','d','afafw');
+insert into fr values ('1234-09-04','1234-11-14','1234-02-10','1234-3-30');
+insert into gt values (0,12.0,1.3,-4,'1234-12-12','d3','afafw');
+
+
+create database f8;
+create database f7;
+create database f6;
+create database f5;
+create database f4;
+create database f3;
+create database f2;
+create database f1;
+
+
+create database p1;
+create database p3;
+create database p4;
+alter database p1 rename to p2;
+use database p2;
+create table nv (gt int, rc float, nq date);
+
+
+
+CREATE TABLE cliente (id int CONSTRAINT pkCliente PRIMARY KEY  (id));
+ALTER TABLE cliente ADD COLUMN pisto float;
+CREATE TABLE producto (id int CONSTRAINT pkPrecio PRIMARY KEY  (id));
+ALTER TABLE producto ADD COLUMN  descripcion char(20);
+ALTER TABLE producto ADD COLUMN  precio float ;
+CREATE TABLE recibo (idCliente int, idProducto int, totalCompra float,id int);
+ALTER TABLE recibo ADD CONSTRAINT pkRecibo PRIMARY KEY (id);
+ALTER TABLE recibo ADD CONSTRAINT fkReciboClie FOREIGN KEY (idCliente) REFERENCES cliente(id);
+ALTER TABLE recibo ADD CONSTRAINT fkReciboProd FOREIGN KEY  (idProducto) REFERENCES producto(id);
+CREATE TABLE empleado (id int, nombre char(20) CONSTRAINT pkEmpleado PRIMARY KEY (id));
+
+
+
+
+create database p1;
+create database p3;
+create database p4;
+alter database p1 rename to p2;
+use database p2;
+create table nv (gt int, rc float, nq date);
+use database p4;
+CREATE TABLE producto (id int CONSTRAINT pkPrecio PRIMARY KEY  (id));
+CREATE TABLE recibo (idCliente int, idProducto int, totalCompra float,id int);
+CREATE TABLE empleado (id int, nombre char(20) CONSTRAINT pkEmpleado PRIMARY KEY (id));

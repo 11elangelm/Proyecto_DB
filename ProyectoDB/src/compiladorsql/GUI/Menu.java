@@ -46,7 +46,8 @@ public class Menu extends javax.swing.JFrame {
         while (--index >= 0) {
             if (String.valueOf(text.charAt(index)).matches("\\W")) {
                 break;
-            }
+            }//
+            
         }
         return index;
     }

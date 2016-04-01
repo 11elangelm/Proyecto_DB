@@ -95,7 +95,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 // un nuevo comentario sin ninguna cosa nueva
 //                crear el archivo de la metadata local para la db                
                 try {
-                    this.crearArchivo(nombre,dirBase+nombre+"\\METADATA_"+nombre+".json");
+                    this.crearArchivo(nombre,dirBase+nombre+"\\METADATA.json");
                     
                         try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(nombre,dirBase+nombre+"\\METADATA_"+nombre+".json"), true))) {
                             bw.write("ESTE DEBERIA QUEDARSE A PESAR DEL CAMBIO DE NOMBRE");
@@ -142,14 +142,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
 
 //            reemplazar el nombre en la metadata local
-            File o1=new File(dirBase+nv+"\\METADATA_"+nv+".json");
-            
-            if(o1.renameTo(new File(dirBase+nn+"\\METADATA_"+nn+".json"))){
-                revVerb("La metadata local de:"+nv+" fue renombrada con exito");
-            }else{
-                revVerb("La metadata local de:"+nv+" no pudo ser renombrada");
-            }
-            
+
 //            RENOMBRAR LA DB EN LA METADATA GENERAL
             try {
                 this.renameFromMDGeneral(ctx.ID(0).getText(), ctx.ID(1).getText());

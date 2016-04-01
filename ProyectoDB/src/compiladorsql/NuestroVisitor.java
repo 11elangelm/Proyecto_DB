@@ -437,9 +437,9 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 //        OBTENER LOS NUMEROS DE LA FECHA INGRESADA
 //        SE USA UNSIGNEDINT PORQUE LOS NUMEROS SON TODOS POSITIVOS 
 
-        int year=Integer.parseUnsignedInt(ctx.getText().substring(1, 5));
-        int month=Integer.parseUnsignedInt(ctx.getText().substring(6, 8));
-        int day=Integer.parseUnsignedInt(ctx.getText().substring(9,11));
+        int year=Integer.parseInt(ctx.getText().substring(1, 5));
+        int month=Integer.parseInt(ctx.getText().substring(6, 8));
+        int day=Integer.parseInt(ctx.getText().substring(9,11));
         //REVISAR QUE EL MES SEA VALIDO
         if(month>12){
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), Los meses no deben ser mayores a 12");

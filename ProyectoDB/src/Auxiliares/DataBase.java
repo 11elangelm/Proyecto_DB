@@ -33,4 +33,11 @@ public class DataBase {
     public void setNumTablas(int numTablas) {
         this.numTablas = numTablas;
     }
+
+    @Override
+    public String toString() {
+        return "DataBase{" + "name=" + name + ", numTablas=" + numTablas + '}';
+    }
+    
+    
 }

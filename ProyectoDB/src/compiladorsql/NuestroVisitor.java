@@ -78,13 +78,13 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             if (successful){
                 
 //                      AGREGAR LA NUEVA DB A LA METADATA GENERAL PARA SU USO
-                this.metaDataGENERALDBnames.add(ctx.ID().getText());
-                this.metaDataGENERALDBnumTablas.add(0);
-                revVerb("Folder para dB creado exitosamente");
+                    this.metaDataGENERALDBnames.add(ctx.ID().getText());
+                    this.metaDataGENERALDBnumTablas.add(0);
+                    revVerb("Folder para dB creado exitosamente");
                     
                     
 //                    agregar el archivo a la metadata general
-                DataBase nueva=new DataBase(nombre,0);
+                    DataBase nueva=new DataBase(nombre,0);
                 try {
                     this.addToMDGeneral(nueva);
                 } catch (IOException ex) {
@@ -95,7 +95,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
 //                crear el archivo de la metadata local para la db                
                 try {
-                    this.crearArchivo(nombre,dirBase+nombre+"\\METADATA"+".json");
+                    this.crearArchivo(nombre,dirBase+nombre+"\\METADATA_"+nombre+".json");
                     
                         try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(nombre,dirBase+nombre+"\\METADATA_"+nombre+".json"), true))) {
                             bw.write("ESTE DEBERIA QUEDARSE A PESAR DEL CAMBIO DE NOMBRE");
@@ -141,6 +141,16 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             }
 
 
+//            reemplazar el nombre en la metadata local
+            File o1=new File(dirBase+nv+"\\METADATA_"+nv+".json");
+            
+            if(o1.renameTo(new File(dirBase+nn+"\\METADATA_"+nn+".json"))){
+                revVerb("La metadata local de:"+nv+" fue renombrada con exito");
+            }else{
+                revVerb("La metadata local de:"+nv+" no pudo ser renombrada");
+            }
+            
+//            RENOMBRAR LA DB EN LA METADATA GENERAL
             try {
                 this.renameFromMDGeneral(ctx.ID(0).getText(), ctx.ID(1).getText());
             } catch (IOException ex) {
@@ -587,8 +597,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     private void renameFromMDLocal(String oldDir, String newDir) throws IOException{
         
         File old=new File(oldDir);
-        
-        
+        File nuevo=new File(newDir);
         String arc="";
         ArrayList<String>filas=new ArrayList();
         //guardar toda la data existente en el archivo
@@ -600,6 +609,8 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         if(br!=null){
             br.close();
         }
+        
+        old.renameTo(nuevo);
         
         BufferedWriter bw = new BufferedWriter(new FileWriter(old));
         for (String fila : filas) {

@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 /**
  *
@@ -43,6 +45,15 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     private boolean verbose=false,
             bUse=false;
     private String hb="";
+    
+    
+/****************************************************************************************************
+                                        NO SE OLVIDEN DE
+                                        AGREGAR EL VERBOSE CON EL 
+                                        METODO revVerb()
+                                        MIREN COMO LO USE YO
+                                        EN EL CREATEDB
+****************************************************************************************************/
 
     @Override
     public T visitSqlProgram(GramaticaParser.SqlProgramContext ctx) {
@@ -53,60 +64,62 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         this.metaDataLOCALTBelementosNum=new ArrayList();
         this.metaDataLOCALTBcolumnas=new ArrayList();
         this.metaDataLOCALTBtipos=new ArrayList();
-        
-        return (T)visitChildren(ctx); //To change body of generated methods, choose Tools | Templates.
+        for (ParseTree child : ctx.children) {
+            visit(child);
+        }
+        return (T)"";
     }
     
     
     
-    
+    /******************
+     * CREA UN FOLDER PARA ALMACENAR LAS TABLAS
+     * AGREGAR EL NOMBRE DE LA DB A LA METADATA GENERAL
+    *******************/
     @Override
     public T visitCrearDB(GramaticaParser.CrearDBContext ctx) {
         String nombre=ctx.ID().getText();
         File dir = new File(dirBase+nombre);
         
-        revVerb("Revisando que la DB no exista ya para poder crearla");
+        revVerb("Revisando que la DB "+nombre+" no exista ya para poder crearla");
         if(dir.isDirectory()){
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), genera una DB ya existente ");
             
-            return (T)"error al tratar crear DB ya existente";
+            return (T)"error al tratar crear DB  ya existente";
             
         }else{
-//            System.out.println("EL folder para la db NO existe");
+            
             //trata de crear el directorio
             boolean successful = dir.mkdir();
             if (successful){
                 
-//                      AGREGAR LA NUEVA DB A LA METADATA GENERAL PARA SU USO
+//                    agregar el archivo a la metadata general en memoria
                     this.metaDataGENERALDBnames.add(ctx.ID().getText());
                     this.metaDataGENERALDBnumTablas.add(0);
-                    revVerb("Folder para dB creado exitosamente");
                     
+                    revVerb("Folder para dB "+nombre+" creado exitosamente");
                     
-//                    agregar el archivo a la metadata general
+//                      AGREGAR LA NUEVA DB A LA METADATA GENERAL PARA SU USO
                     DataBase nueva=new DataBase(nombre,0);
                 try {
                     this.addToMDGeneral(nueva);
+                    revVerb("Creada la entrada de la DB "+nombre+" a la metadata General");
                 } catch (IOException ex) {
                     System.err.println("ERROR AL AGREGAR "+nombre+" A LA METADA GENERAL");
                     
                 }
-
-// un nuevo comentario sin ninguna cosa nueva
-//                crear el archivo de la metadata local para la db                
+                
+//                crear el archivo de la metadata local para la DB
                 try {
                     this.crearArchivo(nombre,dirBase+nombre+"\\METADATA.json");
-                    
-                        try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(nombre,dirBase+nombre+"\\METADATA_"+nombre+".json"), true))) {
-                            bw.write("ESTE DEBERIA QUEDARSE A PESAR DEL CAMBIO DE NOMBRE");
-                        }
+                    revVerb("Creado el archivo metadata de la DB "+nombre+" ");
                 } catch (IOException ex) {
                     System.err.println(ex.getMessage());
                 }
                 
             }else{
                 this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede crear el directorio especificado");
-                revVerb("Folder para la DB no creado");
+                revVerb("Folder para la DB "+nombre+"  no creado");
                 
                 return (T)"error al tratar crear DB ";
             }
@@ -116,45 +129,50 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         return (T)""; //To change body of generated methods, choose Tools | Templates.
     }
 
+    /******************
+     * CAMBIA EL NOMBRE DE LA DB EN LA METADATA GENERAL Y
+     * CAMBIA EL NOMBRE DEL FOLDER QUE CONTIENE LAS TABLAS DE LA DB
+     *
+    *******************/
     @Override
     public T visitAlterarDB(GramaticaParser.AlterarDBContext ctx) {
         
-        String nv=ctx.ID(0).getText();
-        String nn=ctx.ID(1).getText();
+        String nombreViejo=ctx.ID(0).getText();
+        String nombreNuevo=ctx.ID(1).getText();
         //VER SI LA DB QUE QUIERO RENOMBRAR YA EXISTE
-        File old = new File(dirBase+nv);
+        File old = new File(dirBase+nombreViejo);
         
-        revVerb("revisar que la db ya exista para poder renombrar");
+        revVerb("revisar que la DB "+nombreViejo+"  ya exista para poder renombrar");
         if(!old.isDirectory()){
-            revVerb("DB no existe para ser renombrada");
+            revVerb("DB "+nombreViejo+" no existe para ser renombrada");
             
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede renombrar la DB:"+ctx.ID(0)+" que no existe");
             return (T)"error al renombrar una DB que no existe";
         }
         
 //        CAMBIAR EL NOMBRE DE LA DB EN LOS LUGARES BASICOS
-        File nuevo = new File(dirBase+nn);
+        
+//        cambiado el nombre de la carpeta
+        File nuevo = new File(dirBase+nombreNuevo);
         if(old.renameTo(nuevo)){
-            revVerb("DB renombrada exitosamente");
-            if(this.dirActual.equals(this.dirBase+nv)){
-                this.dirActual=this.dirBase+nn;
+            
+            if(this.dirActual.equals(this.dirBase+nombreViejo)){
+                this.dirActual=this.dirBase+nombreNuevo;
             }
-
-
-//            reemplazar el nombre en la metadata local
 
 //            RENOMBRAR LA DB EN LA METADATA GENERAL
             try {
-                this.renameFromMDGeneral(ctx.ID(0).getText(), ctx.ID(1).getText());
+                this.renameFromMDGeneral(nombreViejo, nombreNuevo);
             } catch (IOException ex) {
                 System.err.println("error al renombrar la db "+ctx.ID(0).getText() +" en la metada general");
                 //Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
             }
             
+            revVerb("DB->"+nombreViejo+" renombrada como ->"+nombreNuevo);
             
 //            this.metaDataGENERALDBnames.set(this.metaDataGENERALDBnames.indexOf(ctx.ID(0).getText()), ctx.ID(1).getText());
         }else{
-            revVerb("DB no pudo ser renombrada");
+            revVerb("DB->"+nombreViejo+" no pudo ser renombrada");
         }
         
         
@@ -165,67 +183,91 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         return (T)"";
     }
 
+    /******************
+     * CAMBIA EL DIRECTORIO ACTUAL PARA QUE APUNTE AL DE LA DB ESPECIFICADA
+     * 
+    *******************/
     @Override
     public T visitUsarDB(GramaticaParser.UsarDBContext ctx) {
-        this.bUse=true;
-        File old = new File(dirBase+ctx.ID());
         
-        revVerb("Revisando que la DB exista para ser usada");
+        this.bUse=true;
+        String nombre=ctx.ID().getText();
+        File old = new File(dirBase+nombre);
+        
+        revVerb("Revisando que la DB "+nombre+" exista para ser usada");
         if(!old.isDirectory()){
             revVerb("La DB buscada no existe");
-            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede usar la DB:"+ctx.ID()+" porque no existe");
+            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede usar la DB:"+nombre+" porque no existe");
             return(T)"error buscando la DB para uso";
         }
         revVerb("La DB buscada si existe");
         System.out.println("USANDO: "+old.getAbsolutePath());
-        this.dirActual=dirBase+ctx.ID();
+        this.dirActual=dirBase+nombre;
         
         return(T)""; //To change body of generated methods, choose Tools | Templates.
     }
     
+    /******************
+     * BORRA EL NOMBRE DE LA DB EN LA METADATA GENERAL Y
+     * BORRA EL  FOLDER QUE CONTIENE LAS TABLAS DE LA DB
+     *
+    *******************/
     @Override
     public T visitEliminarDB(GramaticaParser.EliminarDBContext ctx) {
-        File old = new File(dirBase+ctx.ID());
-        revVerb("Revisando que la DB exista para ser eliminada");
         
-        if(!old.isDirectory()){
-            revVerb("La DB buscada no existe");
+        String nombre=ctx.ID().getText();
+        File toDelete = new File(dirBase+nombre);
+        revVerb("Revisando que la DB "+nombre+" exista para ser eliminada");
+        
+//        REVISAR QUE LA DB EXISTA
+        if(!toDelete.isDirectory()){
+            
+            revVerb("La DB "+nombre+" buscada no existe");
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede eliminar la DB:"+ctx.ID()+" porque no existe");
             return(T)"error buscando la DB para uso";
+            
+        }else{
+            
+            int opcion=JOptionPane.showConfirmDialog(null, "Desea Eliminar la DB:\""+ nombre +"\" que tiene "+"\"IR A OBTENER LOS REGISTROS A LA METADATA\" "+"registros","ATENCION",JOptionPane.INFORMATION_MESSAGE);
+            if(opcion==JOptionPane.YES_OPTION){
+                try {
+                //            ABRIR EL ARCHIVO DE LA METADATA GENERAL Y EDITARLO
+                    this.eliminarFromMDGeneral(nombre);
+                } catch (IOException ex) {
+                    revVerb("No se puede eliminar la DB especificada");
+                    Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                revVerb("DB->"+nombre+" eliminada de la metadata general");
+                deleteDir(toDelete);
+                revVerb("DB->"+nombre+" eliminada");
+                
+            }
+            
         }
         
-        
-        /***********************************
-        *FALTA HACER EL PROCEDIMIENTO PARA ELIMINAR LA BASE DE DATOS EN LA PRÁCTICA
-        ************************************/
-        
-        
-        
-        
-        
-        /*
-        **********************************
-        *ELIMINAR LA DB DE LA METADATA, ESTO VA DESPUES DE HACER LOS PROCEDIMIENTOS
-        ***********************************
-        */
-        /*int index=this.metaDataGENERALDBnames.indexOf(ctx.ID().getText());
-        this.metaDataGENERALDBnumTablas.remove( index );
-        this.metaDataGENERALDBnames.remove(index);
-        */
         return (T)"";
     }
 
+    /******************
+     * IMPRIME EN LA CONSOLA LAS DB's EXISTENTES,
+     * SI NO HAY NIGUNA ENTONCES MUESTRA UN MENSAJE DICIENDOLO
+     *
+    *******************/
     @Override
     public T visitMostrarDB(GramaticaParser.MostrarDBContext ctx) {
-        revVerb("mostrar las DB");
-        for (String name : this.metaDataGENERALDBnames) {
-            System.out.println("DB------>"+name);
+        
+        try {
+            List<DataBase> infoMDGeneral = this.getInfoMDGeneral();
+            if(infoMDGeneral!=null){
+                for (DataBase base : infoMDGeneral) {
+                    System.out.println(base.toString());
+                }
+            }else{
+                System.out.println("NO HAY DB's PARA MOSTRAR");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        /*********************
-         FALTA MOSTRARLOS DE UNA MANERA ELEGANTE
-         **********************/
-        
         
         return (T)"";
     }
@@ -406,26 +448,10 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitEntero(GramaticaParser.EnteroContext ctx) {
         return(T) ctx.getText();
-        /*boolean bNeg=false;
-//        REVISASR SI EL NUMERO ES NEGATIVO
-        if(ctx.MINUS()!=null){
-            bNeg=true;
-        }
-        
-        if(bNeg){
-            String gt="-"+ctx.NUM().getText();
-            return (T)gt;
-        }else{
-            return (T)ctx.NUM().getText();
-        }*/
-        
     }
     
     @Override
     public T visitDecimal(GramaticaParser.DecimalContext ctx) {
-        /*boolean bNeg=false;
-        int pEnt=Integer.parseInt((String)visit(ctx.entero()));
-        float numF=pEnt+Integer.parseUnsignedInt("0."+ctx.NUM().getText());*/
         return (T)ctx.getText(); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -466,10 +492,16 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         return (T)ctx.getText();
     }
 
+    
+/****************************************************************************************************
+                                        METODOS AUXILIARES
+****************************************************************************************************/
+    
     public ArrayList<String> getErrores() {
         return this.errores;
     }
 
+    
     public boolean isVerbose() {
         return verbose;
     }
@@ -477,15 +509,20 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
     }
-    /*
-        metodo para imprimir mensajes en consola si la opcion Verbose es activada
-    */
-    public void revVerb(String mensaje){
+    
+    /*******************************
+     * metodo para imprimir mensajes en consola si la opcion Verbose es activada
+    *******************************/
+    private void revVerb(String mensaje){
         if(verbose){
             System.out.println(mensaje);
         }
     }
     
+    
+    /*************************
+        IMPRIME LOS DATOS EXISTENTES EN LA METADA GENERAL
+    *************************/
     public void getMDglob(){
         
         String tN="DB's->[",tT="# Tablas->[";
@@ -514,7 +551,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         System.out.println("TIPOS->"+tTipos);
     }
     
-    public void crearArchivo(String nombre,String dir) throws IOException{
+    private void crearArchivo(String nombre,String dir) throws IOException{
         File porCrear=new File(dir);
         if(!porCrear.exists()){
             porCrear.createNewFile();
@@ -524,8 +561,12 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
     }
     
+    /******************************
+     *  METODO QUE AGREGA UNA DB EN LA METADA GENERAL    
+     * 
+    *******************************/
     
-    public void addToMDGeneral(DataBase db) throws IOException{
+    private void addToMDGeneral(DataBase db) throws IOException{
         File gen=new File("Bases de Datos\\metaData_GENERAL.json");
         BufferedWriter bw = new BufferedWriter(new FileWriter(gen, true));
         Gson gson = new Gson();
@@ -535,20 +576,15 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         bw.close();
     }
     
-    private void add2(DataBase db) throws IOException{
-        File gen=new File("Bases de Datos\\metaData_GENERAL.json");
-        BufferedWriter bw = new BufferedWriter(new FileWriter(gen, false));
-        Gson gson = new Gson();
-        String json = gson.toJson(db);
-        bw.write(json);
-        bw.newLine();
-        bw.close();
-    }
+    /************************
+     * METODO QUE SIRVE PARA OBTENER LA LISTA DE LAS BASES DE DATOS EXISTENTES PARA SU USO POSTERIOR
+     * DEVUELVE NULL SI NO HAY DB's CREADAS
+     * ESTE ES UN METODO AUXILIAR
+    *************************/
     
-    public void renameFromMDGeneral(String oldName,String newName) throws FileNotFoundException, IOException{
-        String arc="[";
+    private List<DataBase> getInfoMDGeneral() throws FileNotFoundException, IOException{
         File gen=new File("Bases de Datos\\metaData_GENERAL.json");
-        
+        String arc="[";
         BufferedReader br = new BufferedReader(new FileReader(gen));
         String s="";        
         while(((s=br.readLine())!=null)){
@@ -557,61 +593,90 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         if(br!=null){
             br.close();
         }
-        gen.delete();
         arc=arc.substring(0, arc.length()-1)+"]";
-        System.out.println("******************->"+arc);
+        //System.out.println("******************->"+arc);
         
         final Type tipoListaDB = new TypeToken<List<DataBase>>(){}.getType();
         final Gson gson = new Gson();
-        final List<DataBase> bases = gson.fromJson(arc, tipoListaDB);
-        
-//        HACER EL NUEVO ARCHIVO DE METADATA
-        gen.createNewFile();
-        
-        
-        //itero sobre las bases existentes para cambiar el nombre de la que busco y las agrego de nuevo al archivo
-        for (DataBase base : bases) {
-            if(base.getName().equals(oldName)){
-                
-                base.setName(newName);
-                addToMDGeneral(base);
-                
-            }else{
-                addToMDGeneral(base);
-            }
-            
+        List<DataBase> bases=null;
+        try{
+            bases= gson.fromJson(arc, tipoListaDB);
+        }catch(Exception e){
+            return null;
         }
         
-        
-        
-        
+        return bases;
     }
     
-    private void renameFromMDLocal(String oldDir, String newDir) throws IOException{
+    /*************************
+     * METODO QUE RENOMBRA UNA DB EN LA METADA GENERAL
+     * 
+    *************************/
+    
+    private void renameFromMDGeneral(String oldName,String newName) throws FileNotFoundException, IOException{
         
-        File old=new File(oldDir);
-        File nuevo=new File(newDir);
-        String arc="";
-        ArrayList<String>filas=new ArrayList();
-        //guardar toda la data existente en el archivo
-        BufferedReader br = new BufferedReader(new FileReader(old));
-        String s="";
-        while(((s=br.readLine())!=null)){
-            filas.add(s);
+        List<DataBase> bases=getInfoMDGeneral();
+        if(bases!=null){
+            File gen=new File("Bases de Datos\\metaData_GENERAL.json");
+            gen.delete();
+
+    //        HACER EL NUEVO ARCHIVO DE METADATA
+            gen.createNewFile();
+
+            //itero sobre las bases existentes para cambiar el nombre de la que busco y las agrego de nuevo al archivo
+            for (DataBase base : bases) {
+                if(base.getName().equals(oldName)){
+
+                    base.setName(newName);
+                    addToMDGeneral(base);
+
+                }else{
+                    addToMDGeneral(base);
+                }
+
+            }
         }
-        if(br!=null){
-            br.close();
-        }
         
-        old.renameTo(nuevo);
-        
-        BufferedWriter bw = new BufferedWriter(new FileWriter(old));
-        for (String fila : filas) {
-            bw.write(fila);
-            bw.newLine();
-        }
-        bw.close();
-        
-        
+       
     }
+    
+    /*************************
+     * METODO QUE ELIMINA UNA DB EN LA METADA GENERAL 
+     * 
+    *************************/
+    
+    private void eliminarFromMDGeneral(String name) throws IOException{
+        
+        List<DataBase> bases=getInfoMDGeneral();
+        if(bases!=null){
+            File gen=new File("Bases de Datos\\metaData_GENERAL.json");
+            gen.delete();
+    //        HACER EL NUEVO ARCHIVO DE METADATA
+            gen.createNewFile();
+
+
+            //itero sobre las bases existentes para cambiar el nombre de la que busco y las agrego de nuevo al archivo
+            for (DataBase base : bases) {
+                if(base!=null&&base.getName().equals(name)){
+
+                }else{
+                    addToMDGeneral(base);
+                }
+
+            }
+        }
+    }
+    
+     /**************************
+      *     METODO QUE ELIMINA UNA DB 
+      *************************/
+    private void deleteDir(File file) {
+    File[] contents = file.listFiles();
+    if (contents != null) {
+        for (File f : contents) {
+            deleteDir(f);
+        }
+    }
+    file.delete();
+}
 }

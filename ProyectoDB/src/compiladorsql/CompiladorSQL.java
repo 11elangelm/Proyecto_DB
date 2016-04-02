@@ -43,8 +43,8 @@ public class CompiladorSQL {
         mv.visit(tree);
         
         //mostrar las cosas creadas
-        mv.getMDglob();
-        mv.getMDloc();
+        //mv.getMDglob();
+        //mv.getMDloc();
         
         ArrayList<String> n=new ArrayList();
         n.add("Nombre");n.add("Sueldo");n.add("Camisola");

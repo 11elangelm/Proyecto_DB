@@ -28,9 +28,21 @@ public class Table {
         
     }
     
+    private String db="";
+
+    public String getDb() {
+        return db;
+    }
+
+    public void setDb(String db) {
+        this.db = db;
+    }
+    
+    
+    
     public void crear() throws IOException{
         //"src\\Auxiliares\\clases\\"+ elimine esto del path para pruebas
-        File nuevo=new File("src\\Auxiliares\\clases\\"+this.nombre+".java");
+        File nuevo=new File("src\\Auxiliares\\clases\\"+db+"\\"+this.nombre+".java");
         //cambie if para pruebas, debe ser if(!nuevo.exists())
         if(true){
             

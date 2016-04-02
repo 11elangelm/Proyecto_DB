@@ -6,14 +6,14 @@ package Auxiliares.clases;
  */
 public class equipo{
     
-    public String nombre;
-    public int posicion;
+    public int jugadores;
+    public float precio;
     public equipo()
     {
     }
-    public equipo( String nombre, int posicion)
+    public equipo( int jugadores, float precio)
     {
-        this.nombre = nombre;
-        this.posicion = posicion;
+        this.jugadores = jugadores;
+        this.precio = precio;
     }
 }

@@ -7,6 +7,7 @@ package compiladorsql;
 
 import Auxiliares.DataBase;
 import Auxiliares.MakeClass;
+import Auxiliares.Table;
 import Auxiliares.clases.equipo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -115,9 +116,14 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 try {
                     this.crearArchivo(nombre,dirBase+nombre+"\\METADATA.json");
                     revVerb("Creado el archivo metadata de la DB "+nombre+" ");
+                    
+                    File nf=new File ("src\\Auxiliares\\clases\\"+nombre);
+                    nf.mkdir();
                 } catch (IOException ex) {
                     System.err.println(ex.getMessage());
                 }
+                
+                
                 
             }else{
                 this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede crear el directorio especificado");
@@ -234,13 +240,14 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             if(opcion==JOptionPane.YES_OPTION){
                 try {
                 //            ABRIR EL ARCHIVO DE LA METADATA GENERAL Y EDITARLO
-                    this.eliminarFromMDGeneral(nombre);
+                    eliminarFromMDGeneral(nombre);
                 } catch (IOException ex) {
                     revVerb("No se puede eliminar la DB especificada");
                     Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 revVerb("DB->"+nombre+" eliminada de la metadata general");
                 deleteDir(toDelete);
+                deleteDir(new File("src\\Auxiliares\\clases\\"+nombre));
                 revVerb("DB->"+nombre+" eliminada");
                 
             }
@@ -289,25 +296,15 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             return (T)"error porque no hay DB elegida";
             
         }
+        
         /*****************************
          * FALTA CRAR EL ARRAYLIST CON LAS CONSTRAINTS
         *****************************/
         
-        
-        /****************************
-            CREADA LA METADATA DE LA TABLA PARA LA DB ACTUAL
-            * FALTA CREAR LOS ARCHIVOS PARA ESTA TABLA EN ESPECIFICO
-            * FALTA VALIDAR QUE LA TABLA CREADA NO HAYA ESTE SIENDO DUPLICADA
-        *****************************/
-        
-        
         // AGREGO EL NOMBRE DE LA TABLA A LA METADATA DE LA BASE DE DATOS EN USO
-        //this.metaDataLOCALTBnames.add(ctx.ID().getText());
         revVerb("agregar la tabla a la metadata");
-//        BUSCAR EL INDICE DE LA TABLA RECIEN AGREGADA
-        //int ind=this.metaDataLOCALTBnames.indexOf(ctx.ID().getText());
-        revVerb("buscar la tabla recien agregada");
-        revVerb("llenar las tablas con la data correspondiente");
+        
+        revVerb("llenar las tablas con la columnas correspondiente");
 //  LLENAR LA INFO DE LAS COLUMNAS EN LA METADATA LOCAL
         for (int i = 0; i < ctx.columna().size(); i++) 
         {
@@ -318,23 +315,19 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             //separar el id y el tipo para agregarlos a las distintas listas
             String[] split = data.split(",");
             
-//            AGREGO LAS NUEVAS POSICIONES QUE VOY A NECESITAR MAS ADELANTE
-            //this.metaDataLOCALTBcolumnas.add(new ArrayList());//.get(i).add(split[0]);
-            //this.metaDataLOCALTBtipos.add(new ArrayList());//.add(split[1]);
             
 //            AGREGO EL EL NOMBRE Y TIPO DE LA COLUMNA EN LA POSICION CORRESPONDIENTE A LA TABLA
-            //this.metaDataLOCALTBcolumnas.get(ind).add(split[0]);
             columnNames.add(split[0]);
             columnTypes.add(split[1]);
-            //this.metaDataLOCALTBtipos.get(ind).add(split[1]);
             
         }
         
-        
+        revVerb("crear la tabla nueva");
         
         //crear clase para instanciar objetos en el insert
-        MakeClass classMaker = new MakeClass(newTBName, columnNames, columnTypes);
+        Table classMaker = new Table(newTBName, columnNames, columnTypes);
         try {
+            classMaker.setDb(dirActual.substring(dirActual.indexOf("\\")+1));
             classMaker.crear();
         } catch (IOException ex) {
             Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
@@ -342,14 +335,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         revVerb("actualizar metadata global");
         //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA
         hb=dirActual.substring(dirActual.indexOf("\\")+1);
-
-        /*int indi=this.metaDataGENERALDBnames.indexOf( hb );
-
-        //aumentar el contador de tablas en el metadata
-        int cont=(int)this.metaDataGENERALDBnumTablas.get( indi );
-        cont++;
-        this.metaDataGENERALDBnumTablas.set(indi, cont);
-        */
         
         return (T)"";
     }
@@ -357,7 +342,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitAlterarTB(GramaticaParser.AlterarTBContext ctx) {
         hb=ctx.ID().getText();
-        revVerb("voy a alterar la DB");
+        revVerb("voy a alterar la DB:"+hb);
         return (T)visitChildren(ctx);
     }
 
@@ -690,12 +675,14 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
       *     METODO QUE ELIMINA UNA DB 
       *************************/
     private void deleteDir(File file) {
-    File[] contents = file.listFiles();
-    if (contents != null) {
-        for (File f : contents) {
-            deleteDir(f);
+        File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                deleteDir(f);
+            }
         }
+        file.delete();
     }
-    file.delete();
-}
+    
+    
 }

@@ -6,6 +6,8 @@
 package compiladorsql;
 
 import Auxiliares.DataBase;
+import Auxiliares.MakeClass;
+import Auxiliares.clases.equipo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -274,7 +276,11 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
     @Override
     public T visitCrearTB(GramaticaParser.CrearTBContext ctx) {
-        
+        //Crear variables para usar en la instancia del classmaker
+        //nombre
+        String newTBName = ctx.ID().getText();
+        ArrayList<String> columnNames = new ArrayList<String>();
+        ArrayList<String> columnTypes = new ArrayList<String>();
         this.revVerb("revisar si hay una DB en uso para crear la tabla");
         
         if(!this.bUse){
@@ -296,14 +302,15 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         
         // AGREGO EL NOMBRE DE LA TABLA A LA METADATA DE LA BASE DE DATOS EN USO
-        this.metaDataLOCALTBnames.add(ctx.ID().getText());
+        //this.metaDataLOCALTBnames.add(ctx.ID().getText());
         revVerb("agregar la tabla a la metadata");
 //        BUSCAR EL INDICE DE LA TABLA RECIEN AGREGADA
-        int ind=this.metaDataLOCALTBnames.indexOf(ctx.ID().getText());
+        //int ind=this.metaDataLOCALTBnames.indexOf(ctx.ID().getText());
         revVerb("buscar la tabla recien agregada");
         revVerb("llenar las tablas con la data correspondiente");
 //  LLENAR LA INFO DE LAS COLUMNAS EN LA METADATA LOCAL
-        for (int i = 0; i < ctx.columna().size(); i++) {
+        for (int i = 0; i < ctx.columna().size(); i++) 
+        {
             
         //obtener el id y el tipo de la columna para meterlo a la metaDATA local
             String data=(String)visit(ctx.columna(i));
@@ -312,13 +319,25 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             String[] split = data.split(",");
             
 //            AGREGO LAS NUEVAS POSICIONES QUE VOY A NECESITAR MAS ADELANTE
-            this.metaDataLOCALTBcolumnas.add(new ArrayList());//.get(i).add(split[0]);
-            this.metaDataLOCALTBtipos.add(new ArrayList());//.add(split[1]);
+            //this.metaDataLOCALTBcolumnas.add(new ArrayList());//.get(i).add(split[0]);
+            //this.metaDataLOCALTBtipos.add(new ArrayList());//.add(split[1]);
             
 //            AGREGO EL EL NOMBRE Y TIPO DE LA COLUMNA EN LA POSICION CORRESPONDIENTE A LA TABLA
-            this.metaDataLOCALTBcolumnas.get(ind).add(split[0]);
-            this.metaDataLOCALTBtipos.get(ind).add(split[1]);
+            //this.metaDataLOCALTBcolumnas.get(ind).add(split[0]);
+            columnNames.add(split[0]);
+            columnTypes.add(split[1]);
+            //this.metaDataLOCALTBtipos.get(ind).add(split[1]);
             
+        }
+        
+        
+        
+        //crear clase para instanciar objetos en el insert
+        MakeClass classMaker = new MakeClass(newTBName, columnNames, columnTypes);
+        try {
+            classMaker.crear();
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
         }
         revVerb("actualizar metadata global");
         //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA

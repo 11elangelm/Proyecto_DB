@@ -8,7 +8,7 @@ package compiladorsql;
 import Auxiliares.DataBase;
 import Auxiliares.MakeClass;
 import Auxiliares.Table;
-import Auxiliares.clases.equipo;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -114,7 +114,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 
 //                crear el archivo de la metadata local para la DB
                 try {
-                    this.crearArchivo(nombre,dirBase+nombre+"\\METADATA.json");
+                    this.crearArchivo(dirBase+nombre+"\\METADATA.json");
                     revVerb("Creado el archivo metadata de la DB "+nombre+" ");
                     
                     File nf=new File ("src\\Auxiliares\\clases\\"+nombre);
@@ -289,7 +289,11 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         ArrayList<String> columnNames = new ArrayList<String>();
         ArrayList<String> columnTypes = new ArrayList<String>();
         this.revVerb("revisar si hay una DB en uso para crear la tabla");
-        
+        try {
+            crearArchivo(this.dirActual + "\\" + newTBName+".json");
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if(!this.bUse){
             revVerb("no hay DB seleccionada");
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no pueder crear una tabla porque no hay DB seleccionada");
@@ -555,7 +559,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         System.out.println("TIPOS->"+tTipos);
     }
     
-    private void crearArchivo(String nombre,String dir) throws IOException{
+    private void crearArchivo(String dir) throws IOException{
         File porCrear=new File(dir);
         if(!porCrear.exists()){
             porCrear.createNewFile();

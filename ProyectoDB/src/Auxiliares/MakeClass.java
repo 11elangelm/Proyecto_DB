@@ -30,8 +30,10 @@ public class MakeClass {
     
     
     public void crear() throws IOException{
+        //"src\\Auxiliares\\clases\\"+ elimine esto del path para pruebas
         File nuevo=new File("src\\Auxiliares\\clases\\"+this.name+".java");
-        if(!nuevo.exists()){
+        //cambie if para pruebas, debe ser if(!nuevo.exists())
+        if(true){
             
             nuevo.createNewFile();
             
@@ -47,16 +49,38 @@ public class MakeClass {
                             " */\n" +
                             "public class "+this.name +"{\n" +
                             "    \n");
+            String constructorParams = "( ";
             
-            for (int i = 0; i < nombres.size(); i++) {
+            for (int i = 0; i < nombres.size(); i++) 
+            {
+                
                 if(tipos.get(i).contains("char")){
-                    writer.write("String " + nombres.get(i) + ";\n" );
+                    constructorParams = constructorParams + "String " + nombres.get(i);
+                    writer.write("    public String " + nombres.get(i) + ";\n" );
+                    if(i <nombres.size()-1)
+                    {
+                        constructorParams = constructorParams + ", ";
+                    }
                 }else{
-                    writer.write(tipos.get(i)+" " +nombres.get(i)+";\n" );
+                    writer.write("    public " + tipos.get(i)+" " +nombres.get(i)+";\n" );
+                    constructorParams = constructorParams + tipos.get(i)+" " +nombres.get(i);
+                    if(i <nombres.size()-1)
+                    {
+                        constructorParams = constructorParams + ", ";
+                    }
                 }
             }
-            
-            writer.write("}");
+            writer.write("    public " + this.name + "()" + "\n");
+            writer.write("    {"+ "\n");
+            writer.write("    }"+ "\n");
+            writer.write("    public " + this.name + constructorParams + ")"+ "\n");
+            writer.write("    {"+ "\n");
+            for (int i = 0; i < nombres.size(); i++) 
+            {
+                writer.write("        this." + nombres.get(i) + " = " + nombres.get(i)+";"+ "\n");
+            }
+            writer.write("    }"+ "\n");
+            writer.write("}"+ "\n");
             writer.close();
         }else{
             throw new IOException("EL archivo de clase ("+ this.name+") que trata de crear ya existe");

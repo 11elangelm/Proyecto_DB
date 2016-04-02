@@ -176,6 +176,11 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 //Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
             }
             
+            
+            File vj = new File("src\\Auxiliares\\clases\\"+nombreViejo);
+            File nv2 = new File("src\\Auxiliares\\clases\\"+nombreNuevo);
+            vj.renameTo(nv2);
+            
             revVerb("DB->"+nombreViejo+" renombrada como ->"+nombreNuevo);
             
 //            this.metaDataGENERALDBnames.set(this.metaDataGENERALDBnames.indexOf(ctx.ID(0).getText()), ctx.ID(1).getText());

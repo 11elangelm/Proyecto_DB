@@ -427,6 +427,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     }
     
     
+    
     @Override
     public T visitMostrarColumnasTB(GramaticaParser.MostrarColumnasTBContext ctx) 
     {

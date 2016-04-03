@@ -373,6 +373,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     {
         return (T)"";
     }
+    
     @Override
     public T visitAlterarTB(GramaticaParser.AlterarTBContext ctx) {
         hb=ctx.ID().getText();

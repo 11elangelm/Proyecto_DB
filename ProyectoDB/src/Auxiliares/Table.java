@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -20,6 +21,8 @@ public class Table {
     public int cantRegistros;
     public ArrayList<String> IDs,Tipos;
     public String nombre;
+    
+    public HashMap<String,String> columnas=new HashMap();
 
     public Table(String name,ArrayList<String> IDs, ArrayList<String> Tipos) {
         this.nombre=name;
@@ -27,8 +30,15 @@ public class Table {
         this.Tipos = Tipos;
         
     }
+    
+    public void llenarMapa(){
+        for (int i = 0; i < IDs.size(); i++) {
+            columnas.put(IDs.get(i), Tipos.get(i));
+        }
+    }
  
     public void crear(String db) throws IOException{
+        llenarMapa();
         //"src\\Auxiliares\\clases\\"+ elimine esto del path para pruebas
         File nuevo=new File("src\\Auxiliares\\clases\\"+db+"\\"+this.nombre+".java");
         //cambie if para pruebas, debe ser if(!nuevo.exists())

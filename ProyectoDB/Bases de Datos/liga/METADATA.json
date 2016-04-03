@@ -1,0 +1,1 @@
+{"cantRegistros":0,"IDs":["nombre","edad","posicion","sueldo"],"Tipos":["char(20)","int","char(10)","float"],"nombre":"jugador"}

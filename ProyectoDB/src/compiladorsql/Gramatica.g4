@@ -81,9 +81,11 @@ glExp: LTHAN | EQLTHAN | GTHAN | EQGTHAN;
 
 relExp: eqExp | glExp;
 
-insert: INSERT INTO ID insertColumns VALUES LPARENT (value (COMMA value)*)* RPARENT;
+insert: INSERT INTO ID insertColumns VALUES insertValues ;
 
+insertValues:LPARENT (value (COMMA value)*)* RPARENT;
 insertColumns: (LPARENT(ID(COMMA ID)*)*RPARENT)?;
+
 value: entero | decimal | fecha | character | nullo;
 nullo: NULO;
 entero:(MINUS)? NUM;

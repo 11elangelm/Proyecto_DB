@@ -430,6 +430,13 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     }
 
     @Override
+    public T visitInsert(GramaticaParser.InsertContext ctx) {
+        return (T)""; //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+
+    @Override
     public T visitTipoChar(GramaticaParser.TipoCharContext ctx) {
         String t="char("+ctx.NUM()+")";
         return (T)t;

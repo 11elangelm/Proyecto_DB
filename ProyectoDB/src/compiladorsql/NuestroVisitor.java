@@ -5,6 +5,7 @@
  */
 package compiladorsql;
 
+import Auxiliares.ContenidoTabla;
 import Auxiliares.DataBase;
 import Auxiliares.MakeClass;
 import Auxiliares.Table;
@@ -63,6 +64,9 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     private HashMap<String,Table>tablasActuales;
     public TableMaker elCreador = new TableMaker();
     
+    private String nameTablaActual="";
+    private HashMap<String,ContenidoTabla> registrosTablasActuales;
+    
 /****************************************************************************************************
                                         NO SE OLVIDEN DE
                                         AGREGAR EL VERBOSE CON EL 
@@ -76,6 +80,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         this.errores=new ArrayList();
         this.metaDataActual=new ArrayList();
         this.tablasActuales=new HashMap();
+        this.registrosTablasActuales=new HashMap();
         this.metaDataLOCALTBnames=new ArrayList();
         this.metaDataGENERALDBnumTablas=new ArrayList();
         this.metaDataLOCALTBelementosNum=new ArrayList();
@@ -234,6 +239,8 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         
         revVerb("La DB buscada si existe");
+        
+        
 //        cargar las tablas existentes en la tabla
         List<Table> infoMDLocal=null;
         try {
@@ -253,6 +260,8 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 this.metaDataActual.add(tabla);
             }
         }
+        System.out.println(Arrays.toString(nuevo.list()));
+//        CARGAR EL CONTENIDO DE LOS REGISTROS DE LAS TABLAS 
         System.out.println("USANDO: "+nuevo.getAbsolutePath());
         this.dirActual=dirBase+nombre;
         
@@ -793,6 +802,17 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         
        
+    }
+    
+    
+    /*************************
+     * METODO QUE CARGA LOS REGISTROS DE LAS TABLAS EN MEMORIA PARA SU 
+     * USO POSTERIOR
+     * 
+    *************************/
+    
+    private void llenarRegistros(File archivo){
+        
     }
     
     /*************************

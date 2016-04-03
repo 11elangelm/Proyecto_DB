@@ -8,10 +8,12 @@ package compiladorsql;
 import Auxiliares.DataBase;
 import Auxiliares.MakeClass;
 import Auxiliares.Table;
+import Auxiliares.TableMaker;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,7 +31,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 /**
@@ -56,7 +61,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     
     private ArrayList<Table> metaDataActual;
     private HashMap<String,Table>tablasActuales;
-    
+    public TableMaker elCreador = new TableMaker();
     
 /****************************************************************************************************
                                         NO SE OLVIDEN DE
@@ -276,7 +281,22 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     *******************/
     @Override
     public T visitMostrarDB(GramaticaParser.MostrarDBContext ctx) {
+        try {
+            List<DataBase> infoMDGeneral = this.getInfoMDGeneral();
+            JTable toShow = elCreador.ShowDatabases(infoMDGeneral);
+            JFrame frame = new JFrame();
+            frame.setTitle("Bases de datos actuales");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            JScrollPane scrollPane = new JScrollPane(toShow);
+            frame.add(scrollPane, BorderLayout.CENTER);
+            frame.setSize(500, 150);
+            frame.setVisible(true);
         
+        
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        /*
         try {
             List<DataBase> infoMDGeneral = this.getInfoMDGeneral();
             if(infoMDGeneral!=null){
@@ -289,6 +309,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         } catch (IOException ex) {
             Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
         }
+        */
         
         return (T)"";
     }
@@ -366,13 +387,40 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitMostrarColumnasTB(GramaticaParser.MostrarColumnasTBContext ctx) 
     {
-        
+        String tableName = ctx.ID().getText();
+        if(this.tablasActuales.containsKey(tableName) == false)
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + tableName + " que no existe" );
+            return (T)"error al mostrar tabla que no existe";
+        }
+        Table tabla = this.tablasActuales.get(tableName);
+        JTable toShow = elCreador.ShowColumnsFrom(tabla);
+        JFrame frame = new JFrame();
+        frame.setTitle("Columnas de " + tableName);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JScrollPane scrollPane = new JScrollPane(toShow);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.setSize(500, 150);
+        frame.setVisible(true);
         return (T)"";
     }
 
     @Override
     public T visitMostrarTablasTB(GramaticaParser.MostrarTablasTBContext ctx) 
     {
+        try {
+            List<Table> tablas = this.getInfoMDLocal();
+            JTable toShow = elCreador.ShowTables(tablas);
+            JFrame frame = new JFrame();
+            frame.setTitle("Tablas de Base de Datos Actual");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            JScrollPane scrollPane = new JScrollPane(toShow);
+            frame.add(scrollPane, BorderLayout.CENTER);
+            frame.setSize(500, 150);
+            frame.setVisible(true);
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return (T)"";
     }
     

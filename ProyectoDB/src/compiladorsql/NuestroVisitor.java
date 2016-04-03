@@ -215,6 +215,13 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitUsarDB(GramaticaParser.UsarDBContext ctx) {
         
+        /********************************
+         * falta la parte de guardar la metada que estoy modificando
+         * 
+        ********************************/
+        
+        
+        //ESTA PARTE CARGA LA NUEVA METADATA QUE VOY A USAR
         this.bUse=true;
         String nombre=ctx.ID().getText();
         File nuevo = new File(dirBase+nombre);
@@ -225,7 +232,27 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede usar la DB:"+nombre+" porque no existe");
             return(T)"error buscando la DB para uso";
         }
+        
         revVerb("La DB buscada si existe");
+//        cargar las tablas existentes en la tabla
+        List<Table> infoMDLocal=null;
+        try {
+             infoMDLocal= this.getInfoMDLocal(dirBase+nombre);
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        this.tablasActuales.clear();
+        if(infoMDLocal!=null){
+            for (Table tabla : infoMDLocal) {
+
+    //            agregar al mapa que le sirve a Angel
+                this.tablasActuales.put(tabla.getNombre(), tabla);
+
+    //          AGREGAR AL ARRAY QUE LE SIRVE A CANTEO
+                this.metaDataActual.add(tabla);
+            }
+        }
         System.out.println("USANDO: "+nuevo.getAbsolutePath());
         this.dirActual=dirBase+nombre;
         
@@ -409,7 +436,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     public T visitMostrarTablasTB(GramaticaParser.MostrarTablasTBContext ctx) 
     {
         try {
-            List<Table> tablas = this.getInfoMDLocal();
+            List<Table> tablas = this.getInfoMDLocal(dirActual);
             JTable toShow = elCreador.ShowTables(tablas);
             JFrame frame = new JFrame();
             frame.setTitle("Tablas de Base de Datos Actual");
@@ -710,8 +737,8 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
      * ESTE ES UN METODO AUXILIAR
     *************************/
     
-    private List<Table> getInfoMDLocal() throws FileNotFoundException, IOException{
-        File gen=new File("Bases de Datos\\metaData_GENERAL.json");
+    private List<Table> getInfoMDLocal(String dir) throws FileNotFoundException, IOException{
+        File gen=new File(dir+"\\METADATA.json");
         String arc="[";
         BufferedReader br = new BufferedReader(new FileReader(gen));
         String s="";        
@@ -733,7 +760,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             return null;
         }
         
-        return tablas;
+        return  tablas;
     }
     
     /*************************

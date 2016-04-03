@@ -578,8 +578,22 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     }
     
     @Override
-    public T visitDropColumnTB(GramaticaParser.DropColumnTBContext ctx) {
-        return (T)"";
+    public T visitDropColumnTB(GramaticaParser.DropColumnTBContext ctx) 
+    {
+        String tableName = hb;
+        String columnName = ctx.ID().getText();
+        //verificar si la tabla existe
+        if(this.tablasActuales.containsKey(hb) == false)
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + hb + " que no existe" );
+            return (T)"error al renombrar tabla que no existe";
+        }
+        //verificar si la columna existe
+        
+        //eliminar la columna
+        
+        return (T)"";    
+        
     }
     
     @Override

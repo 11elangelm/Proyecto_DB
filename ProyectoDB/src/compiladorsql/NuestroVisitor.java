@@ -20,6 +20,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +41,9 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     private ArrayList<String> errores,
             metaDataGENERALDBnames,
             metaDataLOCALTBnames;
-    
+    public Gson Gsoneador = new Gson(); 
+            
+    public DataBase DBactual;
     private ArrayList metaDataGENERALDBnumTablas,
             metaDataLOCALTBelementosNum;
     
@@ -336,18 +341,38 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         //crear clase para instanciar objetos en el insert
         Table classMaker = new Table(newTBName, columnNames, columnTypes);
         try {
-            classMaker.setDb(dirActual.substring(dirActual.indexOf("\\")+1));
-            classMaker.crear();
+            
+            classMaker.crear(dirActual.substring(dirActual.indexOf("\\")+1));
         } catch (IOException ex) {
             Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
         }
         revVerb("actualizar metadata global");
+        String Jsoneado = Gsoneador.toJson(classMaker);
+        Jsoneado = Jsoneado +"\n";
+        try {
+            Files.write(Paths.get(this.dirActual+"\\METADATA.json"), Jsoneado.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+       
+    
         //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA
         hb=dirActual.substring(dirActual.indexOf("\\")+1);
         
         return (T)"";
     }
+    @Override
+    public T visitMostrarColumnasTB(GramaticaParser.MostrarColumnasTBContext ctx) 
+    {
+        
+        return (T)"";
+    }
 
+    @Override
+    public T visitMostrarTablasTB(GramaticaParser.MostrarTablasTBContext ctx) 
+    {
+        return (T)"";
+    }
     @Override
     public T visitAlterarTB(GramaticaParser.AlterarTBContext ctx) {
         hb=ctx.ID().getText();

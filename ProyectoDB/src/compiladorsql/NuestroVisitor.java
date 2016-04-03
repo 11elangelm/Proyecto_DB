@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,7 +40,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
     private String dirBase="Bases de Datos\\",dirActual="";
     private ArrayList<String> errores,
-            metaDataGENERALDBnames,
             metaDataLOCALTBnames;
     public Gson Gsoneador = new Gson(); 
             
@@ -54,6 +54,9 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             bUse=false;
     private String hb="";
     
+    private ArrayList<Table> metaDataActual;
+    private HashMap<String,Table>tablasActuales;
+    
     
 /****************************************************************************************************
                                         NO SE OLVIDEN DE
@@ -66,7 +69,8 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitSqlProgram(GramaticaParser.SqlProgramContext ctx) {
         this.errores=new ArrayList();
-        this.metaDataGENERALDBnames=new ArrayList();
+        this.metaDataActual=new ArrayList();
+        this.tablasActuales=new HashMap();
         this.metaDataLOCALTBnames=new ArrayList();
         this.metaDataGENERALDBnumTablas=new ArrayList();
         this.metaDataLOCALTBelementosNum=new ArrayList();
@@ -102,8 +106,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             if (successful){
                 
 //                    agregar el archivo a la metadata general en memoria
-                    this.metaDataGENERALDBnames.add(ctx.ID().getText());
-                    this.metaDataGENERALDBnumTablas.add(0);
                     
                     revVerb("Folder para dB "+nombre+" creado exitosamente");
                     
@@ -210,16 +212,16 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         this.bUse=true;
         String nombre=ctx.ID().getText();
-        File old = new File(dirBase+nombre);
+        File nuevo = new File(dirBase+nombre);
         
         revVerb("Revisando que la DB "+nombre+" exista para ser usada");
-        if(!old.isDirectory()){
+        if(!nuevo.isDirectory()){
             revVerb("La DB buscada no existe");
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede usar la DB:"+nombre+" porque no existe");
             return(T)"error buscando la DB para uso";
         }
         revVerb("La DB buscada si existe");
-        System.out.println("USANDO: "+old.getAbsolutePath());
+        System.out.println("USANDO: "+nuevo.getAbsolutePath());
         this.dirActual=dirBase+nombre;
         
         return(T)""; //To change body of generated methods, choose Tools | Templates.
@@ -570,7 +572,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         IMPRIME LOS DATOS EXISTENTES EN LA METADA GENERAL
     *************************/
     public void getMDglob(){
-        
+        /*
         String tN="DB's->[",tT="# Tablas->[";
         for (int i = 0; i < this.metaDataGENERALDBnames.size(); i++) {
             tN+=this.metaDataGENERALDBnames.get(i)+",";
@@ -581,7 +583,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         System.out.println(tN);
         System.out.println(tT);
-        
+        */
         //return tN;
     }
 
@@ -652,6 +654,38 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         
         return bases;
+    }
+    
+    /************************
+     * METODO QUE SIRVE PARA OBTENER LA LISTA DE LAS TABLAS EXISTENTES
+     * DEVUELVE NULL SI NO HAY DB's CREADAS
+     * ESTE ES UN METODO AUXILIAR
+    *************************/
+    
+    private List<Table> getInfoMDLocal() throws FileNotFoundException, IOException{
+        File gen=new File("Bases de Datos\\metaData_GENERAL.json");
+        String arc="[";
+        BufferedReader br = new BufferedReader(new FileReader(gen));
+        String s="";        
+        while(((s=br.readLine())!=null)){
+            arc+=s+",";
+        }
+        if(br!=null){
+            br.close();
+        }
+        arc=arc.substring(0, arc.length()-1)+"]";
+        //System.out.println("******************->"+arc);
+        
+        final Type tipoListaTB = new TypeToken<List<Table>>(){}.getType();
+        final Gson gson = new Gson();
+        List<Table> tablas=null;
+        try{
+            tablas= gson.fromJson(arc, tipoListaTB);
+        }catch(Exception e){
+            return null;
+        }
+        
+        return tablas;
     }
     
     /*************************

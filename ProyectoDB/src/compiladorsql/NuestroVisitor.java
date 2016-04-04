@@ -476,11 +476,12 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         //crear clase para instanciar objetos en el insert
         Table classMaker = new Table(newTBName, columnNames, columnTypes);
-        try {
-            classMaker.crear(dirActual.substring(dirActual.indexOf("\\")+1));
-        } catch (IOException ex) {
-            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        //try {
+        //    
+            //classMaker.crear(dirActual.substring(dirActual.indexOf("\\")+1));
+        //} catch (IOException ex) {
+        //    Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+       // }
         revVerb("actualizar metadata global");
         String Jsoneado = Gsoneador.toJson(classMaker);
         Jsoneado = Jsoneado +"\n";
@@ -659,15 +660,22 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         String tableName = hb;
         String columnName = ctx.ID().getText();
         //verificar si la tabla existe
-        if(this.tablasActuales.containsKey(hb) == false)
+        if(this.tablasActuales.containsKey(tableName) == false)
         {
-            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + hb + " que no existe" );
-            return (T)"error al renombrar tabla que no existe";
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + tableName + " que no existe" );
+            return (T)"error al alterar tabla que no existe";
         }
         //verificar si la columna existe
-        
+        Table tabla = this.tablasActuales.get(tableName);
+        if(tabla.IDs.contains(columnName) == false)
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + columnName + " que ya existe" );
+            return (T)"error al eliminar columna que existe";
+        }
         //eliminar la columna
-        
+        int indice = tabla.IDs.indexOf(columnName);
+        tabla.IDs.remove(indice);
+        tabla.Tipos.remove(indice);
         return (T)"";    
         
     }

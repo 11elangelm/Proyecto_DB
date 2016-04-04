@@ -91,6 +91,11 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         for (ParseTree child : ctx.children) {
             visit(child);
         }
+        try {
+            WriteJSon();
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return (T)"";
     }
     
@@ -490,13 +495,13 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         //    Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
        // }
         revVerb("actualizar metadata global");
-        //String Jsoneado = Gsoneador.toJson(classMaker);
-        //Jsoneado = Jsoneado +"\n";
-        //try {
-        //    Files.write(Paths.get(this.dirActual+"\\METADATA.json"), Jsoneado.getBytes(), StandardOpenOption.APPEND);
-        //} catch (IOException ex) {
-        //    Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        //}
+        String Jsoneado = Gsoneador.toJson(classMaker);
+        Jsoneado = Jsoneado +"\n";
+        try {
+            Files.write(Paths.get(this.dirActual+"\\METADATA.json"), Jsoneado.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
        
     
         //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA

@@ -1,0 +1,1 @@
+{"cantRegistros":0,"IDs":["marca","precio","id"],"Tipos":["char(20)","float","int"],"nombre":"carro","columnas":{"marca":"char(20)","precio":"float","id":"int"}}

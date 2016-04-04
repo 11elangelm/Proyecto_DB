@@ -60,3 +60,14 @@ use database p4;
 CREATE TABLE producto (id int CONSTRAINT pkPrecio PRIMARY KEY  (id));
 CREATE TABLE recibo (idCliente int, idProducto int, totalCompra float,id int);
 CREATE TABLE empleado (id int, nombre char(20) CONSTRAINT pkEmpleado PRIMARY KEY (id));
+
+
+
+create database agencia;
+use database agencia;
+create table carro(marca char(20),precio float,id int)
+
+{"marca":"audi","precio":"12564.65","id":"1"}
+{"marca":"bmw","precio":"13564.65","id":"2"}
+{"marca":"mercedes","precio":"14564.65","id":"3"}
+{"marca":"ferrari","precio":"15564.65","id":"4"}

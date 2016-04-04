@@ -681,11 +681,11 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     
     @Override
     public T visitInsert(GramaticaParser.InsertContext ctx) {
-        try {
-            WriteJSon();
-        } catch (IOException ex) {
-            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        try {
+//            WriteJSon();
+//        } catch (IOException ex) {
+//            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         if (this.bUse){
             for (Table table : tablasActuales.values()) {
                 System.out.println(table.toString());
@@ -710,6 +710,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                             ArrayList<String> TiposDeTabla = TablaActual.getTipos();
                             for (GramaticaParser.ValueContext value : values) {
                                 if (values.indexOf(value) < TiposDeTabla.size()-1){
+//                                    if (TiposDeTabla.contains(value.)) 
                                     //INSERTAR EN TABLA
                                 } else{
                                     //INSERTAR NULL                                    

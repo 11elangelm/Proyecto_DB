@@ -268,6 +268,81 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         return(T)""; //To change body of generated methods, choose Tools | Templates.
     }
     
+    private HashMap<String,ContenidoTabla> cargarRegistros(File folder){
+        
+        File[] tablas = folder.listFiles();
+        HashMap<String,ContenidoTabla> dataTablas=new HashMap();
+        final Type tipoListaHashMap = new TypeToken< List <HashMap<String,String> > >(){}.getType();
+        final Gson gson = new Gson();
+        List<HashMap<String,String>> datos=null;
+        String desGsoneado="";
+        
+        
+        
+        for (File tabla : tablas) {
+            
+//            crear el nuevo objeto para almacenar todos los registros de la tabla actual
+            ContenidoTabla readingTable=new ContenidoTabla();
+            
+            /*********************
+            * cargar en un string
+            * los registros de la tabla que voy leyendo
+           **********************/
+           try {
+               desGsoneado=getDatos(folder);
+           } catch (IOException ex) {
+               Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+           }
+
+           /*********************
+            * convertir el string anterior
+            * en un mapa si tiene al menos un registro
+           **********************/
+           if(desGsoneado.equals("[]")){
+               
+               
+               
+           }else{
+               
+               try{
+               datos= gson.fromJson(desGsoneado, tipoListaHashMap);
+               }catch(Exception e){}
+               
+               //agregar los registros al atributo de la lista
+               readingTable.setLista(new ArrayList<HashMap>(datos));
+               
+               
+           }
+           
+           
+//           AGREGAR EL LA TABLA CON SUS DATOS CARGADOS AL HASHMAP CREADO
+           
+        }
+        
+        
+        
+        return null;
+    }
+    
+    /******************
+     * OBTENER EL STRING QUE ESTA ESCRITO EN EL 
+     * ARCHIVO.JSON QUE REPRESENTA LA TABLA
+     * QUE ESTOY LEYENDO
+    *******************/
+    
+    private String getDatos(File tabla) throws FileNotFoundException, IOException{
+        String arc="[";
+        
+        BufferedReader br = new BufferedReader(new FileReader(tabla));
+        String s;
+        while(((s=br.readLine())!=null)){
+            arc+=s+",";
+        }
+        br.close();
+        arc=arc.substring(0, arc.length()-1)+"]";
+        return arc;
+    }
+    
     /******************
      * BORRA EL NOMBRE DE LA DB EN LA METADATA GENERAL Y
      * BORRA EL  FOLDER QUE CONTIENE LAS TABLAS DE LA DB
@@ -322,7 +397,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             JTable toShow = elCreador.ShowDatabases(infoMDGeneral);
             JFrame frame = new JFrame();
             frame.setTitle("Bases de datos actuales");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             JScrollPane scrollPane = new JScrollPane(toShow);
             frame.add(scrollPane, BorderLayout.CENTER);
             frame.setSize(500, 150);
@@ -450,7 +525,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         JTable toShow = elCreador.ShowColumnsFrom(tabla);
         JFrame frame = new JFrame();
         frame.setTitle("Columnas de " + tableName);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JScrollPane scrollPane = new JScrollPane(toShow);
         frame.add(scrollPane, BorderLayout.CENTER);
         frame.setSize(500, 150);
@@ -466,7 +541,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             JTable toShow = elCreador.ShowTables(tablas);
             JFrame frame = new JFrame();
             frame.setTitle("Tablas de Base de Datos Actual");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             JScrollPane scrollPane = new JScrollPane(toShow);
             frame.add(scrollPane, BorderLayout.CENTER);
             frame.setSize(500, 150);
@@ -660,7 +735,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     public T visitFecha(GramaticaParser.FechaContext ctx) {
         System.out.println("FECHA VISITADA->"+ctx.getText());
         
-        
+       
 //        OBTENER LOS NUMEROS DE LA FECHA INGRESADA
 //        SE USA UNSIGNEDINT PORQUE LOS NUMEROS SON TODOS POSITIVOS 
 

@@ -494,6 +494,23 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         return (T)"";
     }
+
+    @Override
+    public Object visitEliminarTB(GramaticaParser.EliminarTBContext ctx) 
+    {
+        String tableName = ctx.ID().getText();
+        if(this.tablasActuales.containsKey(tableName) == false)
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + tableName + " que no existe" );
+            return (T)"error al eliminar tabla que no existe";
+        }
+        Table aRemover = this.tablasActuales.get(tableName);
+        this.tablasActuales.remove(tableName);
+        return (T)""; //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+    
     @Override
     public T visitMostrarColumnasTB(GramaticaParser.MostrarColumnasTBContext ctx) 
     {
@@ -537,7 +554,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitAlterarTB(GramaticaParser.AlterarTBContext ctx) {
         hb=ctx.ID().getText();
-        revVerb("voy a alterar la DB:"+hb);
+        revVerb("voy a alterar la TB:"+hb);
         return (T)visitChildren(ctx);
     }
 
@@ -553,10 +570,23 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         int ind=this.metaDataLOCALTBnames.indexOf(hb);
         
         String data=(String)visit(ctx.columna());
-
-        //separar el id y el tipo para agregarlos a las distintas listas
+        // retriebe table object from map and verify table 
+        if(this.tablasActuales.containsKey(hb) == false)
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + hb + " que no existe" );
+            return (T)"error al alterar tabla que no existe";
+        }
+        Table tabla = this.tablasActuales.get(hb);
+        //separar el id pos 0 y el tipo pos 1 para agregarlos a las distintas listas
         String[] split = data.split(",");
-
+        if(tabla.IDs.contains(split[0]))
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "agrega la columna " + split[0] + " que ya existe" );
+            return (T)"error al agregar columna que ya existe";
+        }
+        tabla.IDs.add(split[0]);
+        tabla.Tipos.add(split[1]);
+        //buscar en 
 //      AGREGO LAS NUEVAS POSICIONES QUE VOY A NECESITAR MAS ADELANTE
         
         this.metaDataLOCALTBcolumnas.add(new ArrayList());//.get(i).add(split[0]);
@@ -589,6 +619,23 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         /******************************
             FALTA HACER LAS VALIDACIONES CON EL ARCHIVO XML
         ******************************/
+        if(this.tablasActuales.containsKey(hb) == false)
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + hb + " que no existe" );
+            return (T)"error al renombrar tabla que no existe";
+        }
+        if(this.tablasActuales.containsKey(ctx.ID().getText()))
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "renombra a " + ctx.ID().getText() + " que ya existe" );
+            return (T)"error al renombrar tabla con un nombre existente";
+        }
+        
+        Table tabla = this.tablasActuales.get(hb);
+        this.tablasActuales.remove(hb);
+        tabla.nombre = ctx.ID().getText();
+        this.tablasActuales.put(ctx.ID().getText(), tabla);
+        
+        
         int ind=this.metaDataLOCALTBnames.indexOf(hb);
         if(ind==-1){
             this.errores.add("La linea:"+ctx.getParent().start.getLine()+", ("+ctx.getParent().getText()+") intenta renombra la tabla ("+hb+") que no existe");
@@ -605,12 +652,27 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     }
     
     @Override
-    public T visitDropColumnTB(GramaticaParser.DropColumnTBContext ctx) {
-        return (T)"";
+    public T visitDropColumnTB(GramaticaParser.DropColumnTBContext ctx) 
+    {
+        String tableName = hb;
+        String columnName = ctx.ID().getText();
+        //verificar si la tabla existe
+        if(this.tablasActuales.containsKey(hb) == false)
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + hb + " que no existe" );
+            return (T)"error al renombrar tabla que no existe";
+        }
+        //verificar si la columna existe
+        
+        //eliminar la columna
+        
+        return (T)"";    
+        
     }
     
     @Override
     public T visitColumna(GramaticaParser.ColumnaContext ctx) {
+        
         String td=ctx.ID().getText()+","+visit(ctx.type());
         return (T)td;
     }

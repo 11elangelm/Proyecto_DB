@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package Auxiliares;
 
 /**
  *
- * @author user
+ * @author juankboix1309
  */
-public class Constraint {
-    
+public class ChConstraint 
+{
+    public ChConstraint(){}
 }

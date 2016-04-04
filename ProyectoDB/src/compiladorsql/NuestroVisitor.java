@@ -228,7 +228,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         ********************************/
         this.bUse=true;
         String nombre=ctx.ID().getText();
-        
+        //una cosa nueva
         File nuevo = new File(dirBase+nombre);
 
         revVerb("Revisando que la DB "+nombre+" exista para ser usada");

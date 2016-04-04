@@ -15,12 +15,30 @@ import java.util.HashMap;
 public class ContenidoTabla {
     private ArrayList<HashMap> lista;
 
+    public ContenidoTabla() {
+        this.lista = new ArrayList();
+    }
+    
     public ArrayList<HashMap> getLista() {
         return lista;
     }
 
     public void setLista(ArrayList<HashMap> lista) {
         this.lista = lista;
+        
+        
+    }
+    
+    public void removeColumna (String nombre){
+        for (HashMap tabla : lista) {
+            tabla.remove(nombre);
+        }
+    }
+    
+    public void agregarColumna (String nombre){
+        for (HashMap tabla : lista) {
+            tabla.put(nombre,null);
+        }
     }
     
     

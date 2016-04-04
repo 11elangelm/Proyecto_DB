@@ -29,6 +29,7 @@ public class Table {
         this.nombre=name;
         this.IDs = IDs;
         this.Tipos = Tipos;
+        llenarMapa();
         
     }
     
@@ -39,7 +40,7 @@ public class Table {
     }
  
     public void crear(String db) throws IOException{
-        llenarMapa();
+        
         //"src\\Auxiliares\\clases\\"+ elimine esto del path para pruebas
         File nuevo=new File("src\\Auxiliares\\clases\\"+db+"\\"+this.nombre+".java");
         //cambie if para pruebas, debe ser if(!nuevo.exists())

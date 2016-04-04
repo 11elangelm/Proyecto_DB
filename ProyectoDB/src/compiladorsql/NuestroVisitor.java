@@ -27,7 +27,10 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
@@ -83,11 +86,11 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         for (ParseTree child : ctx.children) 
         {
             visit(child);
-            try {
+            /*try {
             WriteJSon();
             } catch (IOException ex) {
             //Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            }*/
         }
         
         return (T)"";
@@ -218,65 +221,125 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
      * CAMBIA EL DIRECTORIO ACTUAL PARA QUE APUNTE AL DE LA DB ESPECIFICADA
      * 
     *******************/
+    
+    private List<String> prepareToAddTable(ArrayList<HashMap> lista){
+        System.out.println("voy a preparar estos mapas");
+                    /*for (HashMap mapa : lista) {
+                        System.out.println("mapa");
+                        for (Iterator it = mapa.entrySet().iterator(); it.hasNext();) {
+                            Map.Entry<String, String> entry = (Map.Entry<String, String>) it.next();
+                            String key = entry.getKey();
+                            String value = entry.getValue();
+                            System.out.println("key, " + key + " value " + value);
+                        }
+                    }*/
+        ArrayList<String> result=new ArrayList();
+        for (HashMap registro : lista) {
+            result.add(this.Gsoneador.toJson(registro));
+        }
+        System.out.println(result.toString());
+        return result;
+    }
+    
+    private void escribirTabla(List<String> data,File dir) throws IOException{
+        System.out.println("ESTO es lo que voy a escribir:"+data.toString());
+        dir.delete();
+        dir.createNewFile();
+        BufferedWriter bw = new BufferedWriter(new FileWriter(dir, true));
+        for (String dato : data) {
+            bw.write(dato);
+            bw.newLine();
+        }
+        bw.close();
+    }
+    
     @Override
     public T visitUsarDB(GramaticaParser.UsarDBContext ctx) {
-        
-        /********************************
-         * falta la parte de guardar la metada que estoy modificando
-         * 
-        ********************************/
-        this.bUse=true;
-        String nombre=ctx.ID().getText();
-        //una cosa nueva
-        File nuevo = new File(dirBase+nombre);
+        if(!dirActual.equals("") && !dirActual.equals(dirBase+ctx.ID().getText())){
+            System.out.println("escribiedno los archivos de regreso a disco");
+            System.out.println("estas tablas estan cargadas en memoria");
+            Set<Map.Entry<String, ContenidoTabla>> entrySet = registrosTablasActuales.entrySet();
+            for (Map.Entry<String, ContenidoTabla> datos : entrySet) {
+                System.out.println("TABLA:"+datos.getKey());
+            }
+            File dir= new File(dirActual);
+            final File[] listFiles = dir.listFiles();
+//              RECORRER TODAS LAS TABLAS EXISTENTES PARA 
+            for (File tabla : listFiles) {
+                
+                
+                //FALTA MANEJAR CUANDO HAY NULLS QUE SIGNIFICA QUE NO HAY DATOS
+                
+//                REVISAR QUE EL NOMBRE DE LA TABLA QUE VOY A ESCRIBIR NO SEA EL DE LA METADATA
+                if(!tabla.getName().contains("METADATA")){
+                    String nombre=tabla.getName().substring(0, tabla.getName().indexOf("."));
+                    System.out.println("VOY A ESCRIBIR LA TABLA:"+tabla.getName());
+                    System.out.println(nombre);
+                    System.out.println(this.registrosTablasActuales.containsKey(nombre));
+                    ContenidoTabla content = this.registrosTablasActuales.get(nombre);
+                    
+                    if(content!=null){
+                        List<String> datos=prepareToAddTable(content.getLista());
 
-        revVerb("Revisando que la DB "+nombre+" exista para ser usada");
-        if(!nuevo.isDirectory()){
-            revVerb("La DB buscada no existe");
-            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede usar la DB:"+nombre+" porque no existe");
-            return(T)"error buscando la DB para uso";
-        }
-
-        revVerb("La DB buscada si existe");
-        this.tablasActuales.clear();
-        List<Table> infoMDLocal=null;
-        try {
-            infoMDLocal=(getInfoMDLocal(dirBase+nombre));
-        } catch (IOException ex) {
-            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        if( !(infoMDLocal!=null) || infoMDLocal.size()<1 ){
-            
-            this.dirActual=dirBase+nombre;
-        }else{
-
-            //ESTA PARTE CARGA LA NUEVA METADATA QUE VOY A USAR
-
-    //        cargar las tablas existentes en la tabla
-
-            if(infoMDLocal!=null){
-                for (Table tabla : infoMDLocal) {
-
-        //            agregar al mapa que le sirve a Angel
-                    this.tablasActuales.put(tabla.getNombre(), tabla);
-
-        //          AGREGAR AL ARRAY QUE LE SIRVE A CANTEO
-                    this.metaDataActual.add(tabla);
+                        try {
+                            escribirTabla(datos,tabla);
+                        } catch (IOException ex) {
+                            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
                 }
             }
-            System.out.println(Arrays.toString(nuevo.list()));
-    //        CARGAR EL CONTENIDO DE LOS REGISTROS DE LAS TABLAS 
+            this.tablasActuales.clear();
+        }else{
+            System.out.println("no hay que sobreescribir archivos de regreso");
+            this.bUse=true;
+            String nombre=ctx.ID().getText();
+            //una cosa nueva
+            File nuevo = new File(dirBase+nombre);
+
+            revVerb("Revisando que la DB "+nombre+" exista para ser usada");
+            if(!nuevo.isDirectory()){
+                revVerb("La DB buscada no existe");
+                this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede usar la DB:"+nombre+" porque no existe");
+                return(T)"error buscando la DB para uso";
+            }
+
+            revVerb("La DB buscada si existe");
+//            LIMPIAR LAS VARIABLES QUE VAN A SERVIR EN MEMORIA
             
-            this.registrosTablasActuales=cargarRegistros(nuevo);
             
-            
-            
-            System.out.println(this.registrosTablasActuales.get("carro").getLista().toString());
-            this.dirActual=dirBase+nombre;
-            System.out.println("USANDO: "+nuevo.getAbsolutePath());
-            
+//            LLENAR EL ARRAY CON LA DATA PRESENTE EN LAS TABLAS
+            List<Table> infoMDLocal=null;
+            try {
+                infoMDLocal=(getInfoMDLocal(dirBase+nombre));
+            } catch (IOException ex) {
+                Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            if( !(infoMDLocal!=null) || infoMDLocal.size()<1 ){
+
+                this.dirActual=dirBase+nombre;
+            }else{
+                System.out.println("las DB cargada si tiene tablas creadas");
+        //        cargar las tablas existentes en la tabla
+                if(infoMDLocal!=null){
+                    for (Table tabla : infoMDLocal) {
+            //            agregar al mapa que le sirve a Angel
+                        this.tablasActuales.put(tabla.getNombre(), tabla);
+            //          AGREGAR AL ARRAY QUE LE SIRVE A CANTEO
+                        this.metaDataActual.add(tabla);
+                    }
+                }
+                System.out.println(Arrays.toString(nuevo.list()));
+                
+        //        CARGAR EL CONTENIDO DE LOS REGISTROS DE LAS TABLAS 
+                this.registrosTablasActuales=cargarRegistros(nuevo);
+                this.dirActual=dirBase+nombre;
+                System.out.println("USANDO: "+nuevo.getAbsolutePath());
+
+            }
         }
+        
         return(T)""; //To change body of generated methods, choose Tools | Templates.
     }
     
@@ -298,6 +361,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 System.out.println("FILE SOBRE LA ITERACION " +tabla.getName());
         //            crear el nuevo objeto para almacenar todos los registros de la tabla actual
                     ContenidoTabla readingTable=new ContenidoTabla();
+                    readingTable.setTabla(this.tablasActuales.get(tabla.getName()));
 
                     /*********************
                     * cargar en un string
@@ -316,8 +380,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                    **********************/
                    if(desGsoneado.equals("[]")){
                        revVerb("la tabla "+tabla.getName()+" no tiene datos ingresados");
-
-
                    }else{
                        revVerb("la tabla "+tabla.getName()+" si tiene datos ingresados");
                        try{
@@ -326,9 +388,26 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
                        }
                        System.out.println(desGsoneado);
+                       /*
+                       for (HashMap<String, String> dato : datos) {
+                           System.out.println("HASHMAP");
+                           for (Map.Entry<String, String> entry : dato.entrySet()) {
+                                String key = entry.getKey().toString();
+                                String value = entry.getValue();
+                                System.out.println("key, " + key + " value " + value);
+                           }
+                       }*/
                        //agregar los registros al atributo de la lista
                        ArrayList<HashMap> at=new ArrayList();
+                       
+                       HashMap<String,String> ne=new HashMap();
+                       ne.put("marca", "porsche");
+                       ne.put("precio", "876.23");
+                       ne.put("id", "5");
+                       at.add(ne);
+                       
                        at.addAll(datos);
+                       
                        readingTable.setLista(at);
                    }
         //           AGREGAR EL LA TABLA CON SUS DATOS CARGADOS AL HASHMAP CREADO
@@ -883,12 +962,13 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     private void addToMDGeneral(DataBase db) throws IOException{
         File gen=new File("Bases de Datos\\metaData_GENERAL.json");
         BufferedWriter bw = new BufferedWriter(new FileWriter(gen, true));
-        Gson gson = new Gson();
-        String json = gson.toJson(db);
+        String json = this.Gsoneador.toJson(db);
         bw.write(json);
         bw.newLine();
         bw.close();
     }
+    
+    
     
     /************************
      * METODO QUE SIRVE PARA OBTENER LA LISTA DE LAS BASES DE DATOS EXISTENTES PARA SU USO POSTERIOR
@@ -953,6 +1033,34 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         return  tablas;
     }
+    
+    
+    private List<HashMap<String,String>> getInfoArchivo(String dir) throws FileNotFoundException, IOException{
+        File gen=new File(dir+"\\METADATA.json");
+        String arc="[";
+        BufferedReader br = new BufferedReader(new FileReader(gen));
+        String s="";        
+        while(((s=br.readLine())!=null)){
+            arc+=s+",";
+        }
+        if(br!=null){
+            br.close();
+        }
+        arc=arc.substring(0, arc.length()-1)+"]";
+        //System.out.println("******************->"+arc);
+        
+        final Type tipoListaTB = new TypeToken<List<HashMap<String,String>>>(){}.getType();
+        final Gson gson = new Gson();
+        List<HashMap<String,String>> tablas=new ArrayList();
+        try{
+            tablas= gson.fromJson(arc, tipoListaTB);
+        }catch(Exception e){
+            return tablas;
+        }
+        
+        return  tablas;
+    }
+    
     
     /*************************
      * METODO QUE RENOMBRA UNA DB EN LA METADA GENERAL

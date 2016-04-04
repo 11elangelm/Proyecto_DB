@@ -14,6 +14,17 @@ import java.util.HashMap;
  */
 public class ContenidoTabla {
     private ArrayList<HashMap> lista;
+    private Table tabla;
+
+    public Table getTabla() {
+        return tabla;
+    }
+
+    public void setTabla(Table tabla) {
+        this.tabla = tabla;
+    }
+    
+    
 
     public ContenidoTabla() {
         this.lista = new ArrayList();

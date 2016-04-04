@@ -5,8 +5,12 @@
  */
 package compiladorsql;
 
+import Auxiliares.ChConstraint;
 import Auxiliares.ContenidoTabla;
 import Auxiliares.DataBase;
+import Auxiliares.FkConstraint;
+import Auxiliares.MakeClass;
+import Auxiliares.PkConstraint;
 import Auxiliares.Table;
 import Auxiliares.TableMaker;
 import com.google.gson.Gson;
@@ -62,6 +66,12 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     private ArrayList<Table> metaDataActual;
     private HashMap<String,Table>tablasActuales;
     public TableMaker elCreador = new TableMaker();
+    
+    //tabla y constraints se inicializan y el objse arma al final
+    public Table NewlyCreatedTable;
+    public PkConstraint PkC;
+    public FkConstraint FkC;
+    public ChConstraint ChC;
     
     private String nameTablaActual="";
     private HashMap<String,ContenidoTabla> registrosTablasActuales;
@@ -541,7 +551,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         
         
-//  LLENAR LA INFO DE LAS COLUMNAS EN LA METADATA LOCAL
+//  llenar arraylists para crear objeto tabla
         for (int i = 0; i < ctx.columna().size(); i++) 
         {
         //obtener el id y el tipo de la columna para meterlo a la metaDATA local
@@ -551,18 +561,22 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 //            AGREGO EL EL NOMBRE Y TIPO DE LA COLUMNA EN LA POSICION CORRESPONDIENTE A LA TABLA
             columnNames.add(split[0]);
             columnTypes.add(split[1]);
-            
         }
-        
-        //crear obj tabla
-        Table classMaker = new Table(newTBName, columnNames, columnTypes);
         if(this.tablasActuales.containsKey(newTBName))
         {
             this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + newTBName + " que ya existe" );
             return (T)"error al crear tabla que ya existe";
         }
+
+        //crear obj tabla
+        NewlyCreatedTable = new Table();
+        NewlyCreatedTable.setIDs(columnNames);
+        NewlyCreatedTable.setTipos(columnTypes);
+        NewlyCreatedTable.setNombre(newTBName);
+        NewlyCreatedTable.llenarMapa();
+        //si hay constraints se agregan a la tabla nueva
         //agrga tabla al map
-        this.tablasActuales.put(newTBName, classMaker);
+        this.tablasActuales.put(newTBName, NewlyCreatedTable);
         //crear JSON vacio
         //String Jsoneado = Gsoneador.toJson(classMaker);
         //Jsoneado = Jsoneado +"\n";
@@ -580,6 +594,26 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         return (T)"";
     }
+
+    //visitas para crear constraints
+    @Override
+    public Object visitConstraintPK(GramaticaParser.ConstraintPKContext ctx) 
+    {
+        return (T)"";
+    }
+
+    @Override
+    public Object visitConstraintFK(GramaticaParser.ConstraintFKContext ctx) 
+    {
+        return (T)"";
+    }
+
+    @Override
+    public Object visitConstraintCheck(GramaticaParser.ConstraintCheckContext ctx) 
+    {
+        return (T)"";
+    }
+    
 
     /******************
      *elimina una tabla ya existente 

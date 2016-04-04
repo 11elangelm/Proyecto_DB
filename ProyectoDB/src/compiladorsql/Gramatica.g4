@@ -23,7 +23,7 @@ dOperation: insert
 | delete 
 | query;
 
-tOperation: CREATE TABLE ID LPARENT columna (COMMA columna)* (constraints)* RPARENT #crearTB
+tOperation: CREATE TABLE ID LPARENT columna (CONSTRAINT constraint (COMMA CONSTRAINT constraint)*)? (COMMA columna (CONSTRAINT constraint (COMMA CONSTRAINT constraint)*)?)* RPARENT #crearTB
 | ALTER TABLE ID (tableAction (COMMA tableAction)*)+ #alterarTB
 | DROP TABLE ID #eliminarTB
 | SHOW TABLES #mostrarTablasTB
@@ -31,9 +31,8 @@ tOperation: CREATE TABLE ID LPARENT columna (COMMA columna)* (constraints)* RPAR
 ;
 
 columna:ID type;
-constraints: (CONSTRAINT constraint (COMMA CONSTRAINT constraint)*);
 
-tableAction: ADD COLUMN columna (constraints | ) #addColumnTB
+tableAction: ADD COLUMN columna ((CONSTRAINT constraint (COMMA CONSTRAINT constraint)*)? | ) #addColumnTB
 | ADD CONSTRAINT constraint #addConstraintTB
 | DROP COLUMN ID #dropColumnTB
 | DROP CONSTRAINT ID #dropConstraintTB

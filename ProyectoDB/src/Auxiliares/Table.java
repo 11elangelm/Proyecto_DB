@@ -22,25 +22,40 @@ public class Table {
     public ArrayList<String> IDs = new ArrayList<String>();
     public ArrayList<String>Tipos = new ArrayList<String>();
     public String nombre;
+    public PkConstraint PkS;
+    public FkConstraint FkS;
+    public ChConstraint ChK;
     
     public HashMap<String,String> columnas=new HashMap();
 
-    public Table(String name,ArrayList<String> IDs, ArrayList<String> Tipos) {
+    public Table(){}
+    public Table(String name,ArrayList<String> IDs, ArrayList<String> Tipos) 
+    {
         this.nombre=name;
         this.IDs = IDs;
         this.Tipos = Tipos;
         llenarMapa();
-        
+    }
+    public Table(String name, ArrayList<String> IDs, ArrayList<String> Tipos, PkConstraint PkS, FkConstraint FkS, ChConstraint ChK)
+    {
+        this.nombre = name;
+        this.IDs = IDs;
+        this.Tipos = Tipos;
+        this.PkS = PkS;
+        this.FkS = FkS;
+        this.ChK = ChK;
+        llenarMapa();
     }
     
-    public void llenarMapa(){
+    public void llenarMapa()
+    {
         for (int i = 0; i < IDs.size(); i++) {
             columnas.put(IDs.get(i), Tipos.get(i));
         }
     }
  
     public void crear(String db) throws IOException{
-        
+        //llenarMapa();
         //"src\\Auxiliares\\clases\\"+ elimine esto del path para pruebas
         File nuevo=new File("src\\Auxiliares\\clases\\"+db+"\\"+this.nombre+".java");
         //cambie if para pruebas, debe ser if(!nuevo.exists())

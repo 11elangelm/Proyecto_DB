@@ -8,6 +8,7 @@ package Auxiliares;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 
 /**
@@ -21,6 +22,8 @@ public class TableMaker
     public JTable ShowDatabases(List<DataBase> databases)
     {
         JTable aret = new JTable();
+        
+        
         Object rowNames[] = {"Nombre","No. Tablas"}; 
         Object rowData[][] = new Object[databases.size()][2];
         for(int i=0;i<databases.size(); i++)
@@ -29,6 +32,8 @@ public class TableMaker
             rowData[i][1] = databases.get(i).getNumTablas();        
         }
         aret = new JTable(rowData, rowNames);
+        
+        
         return aret;
     }
     public JTable ShowTables(List<Table> tablas)

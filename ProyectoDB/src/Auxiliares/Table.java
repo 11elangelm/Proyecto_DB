@@ -19,7 +19,8 @@ import java.util.HashMap;
 public class Table {
     //array de objs constraint cuando se cree la clase
     public int cantRegistros;
-    public ArrayList<String> IDs,Tipos;
+    public ArrayList<String> IDs = new ArrayList<String>();
+    public ArrayList<String>Tipos = new ArrayList<String>();
     public String nombre;
     
     public HashMap<String,String> columnas=new HashMap();

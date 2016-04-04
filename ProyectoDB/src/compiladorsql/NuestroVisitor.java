@@ -231,47 +231,51 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
          * falta la parte de guardar la metada que estoy modificando
          * 
         ********************************/
-        
-        
-        //ESTA PARTE CARGA LA NUEVA METADATA QUE VOY A USAR
         this.bUse=true;
         String nombre=ctx.ID().getText();
+        //una cosa nueva
         File nuevo = new File(dirBase+nombre);
-        
+
         revVerb("Revisando que la DB "+nombre+" exista para ser usada");
         if(!nuevo.isDirectory()){
             revVerb("La DB buscada no existe");
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede usar la DB:"+nombre+" porque no existe");
             return(T)"error buscando la DB para uso";
         }
-        
+
         revVerb("La DB buscada si existe");
-        
-        
-//        cargar las tablas existentes en la tabla
+        this.tablasActuales.clear();
         List<Table> infoMDLocal=null;
         try {
-             infoMDLocal= this.getInfoMDLocal(dirBase+nombre);
+            infoMDLocal=(getInfoMDLocal(dirBase+nombre));
         } catch (IOException ex) {
             Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        this.tablasActuales.clear();
-        if(infoMDLocal!=null){
-            for (Table tabla : infoMDLocal) {
+        if( !(infoMDLocal!=null) || infoMDLocal.size()<1 ){
+            
+            this.dirActual=dirBase+nombre;
+        }else{
 
-    //            agregar al mapa que le sirve a Angel
-                this.tablasActuales.put(tabla.getNombre(), tabla);
+            //ESTA PARTE CARGA LA NUEVA METADATA QUE VOY A USAR
 
-    //          AGREGAR AL ARRAY QUE LE SIRVE A CANTEO
-                this.metaDataActual.add(tabla);
+    //        cargar las tablas existentes en la tabla
+
+            if(infoMDLocal!=null){
+                for (Table tabla : infoMDLocal) {
+
+        //            agregar al mapa que le sirve a Angel
+                    this.tablasActuales.put(tabla.getNombre(), tabla);
+
+        //          AGREGAR AL ARRAY QUE LE SIRVE A CANTEO
+                    this.metaDataActual.add(tabla);
+                }
             }
+            System.out.println(Arrays.toString(nuevo.list()));
+    //        CARGAR EL CONTENIDO DE LOS REGISTROS DE LAS TABLAS 
+            System.out.println("USANDO: "+nuevo.getAbsolutePath());
+            this.dirActual=dirBase+nombre;
         }
-        System.out.println(Arrays.toString(nuevo.list()));
-//        CARGAR EL CONTENIDO DE LOS REGISTROS DE LAS TABLAS 
-        System.out.println("USANDO: "+nuevo.getAbsolutePath());
-        this.dirActual=dirBase+nombre;
-        
         return(T)""; //To change body of generated methods, choose Tools | Templates.
     }
     

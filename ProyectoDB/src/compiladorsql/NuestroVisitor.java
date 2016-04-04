@@ -7,12 +7,9 @@ package compiladorsql;
 
 import Auxiliares.ContenidoTabla;
 import Auxiliares.DataBase;
-import Auxiliares.MakeClass;
 import Auxiliares.Table;
 import Auxiliares.TableMaker;
-
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
@@ -52,9 +49,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     public Gson Gsoneador = new Gson(); 
             
     public DataBase DBactual;
-    private ArrayList metaDataGENERALDBnumTablas,
-            metaDataLOCALTBelementosNum;
-    
     private ArrayList<ArrayList<String>> metaDataLOCALTBcolumnas,
             metaDataLOCALTBtipos;
     
@@ -84,8 +78,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         this.tablasActuales=new HashMap();
         this.registrosTablasActuales=new HashMap();
         this.metaDataLOCALTBnames=new ArrayList();
-        this.metaDataGENERALDBnumTablas=new ArrayList();
-        this.metaDataLOCALTBelementosNum=new ArrayList();
         this.metaDataLOCALTBcolumnas=new ArrayList();
         this.metaDataLOCALTBtipos=new ArrayList();
         for (ParseTree child : ctx.children) {
@@ -268,14 +260,21 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             }
             System.out.println(Arrays.toString(nuevo.list()));
     //        CARGAR EL CONTENIDO DE LOS REGISTROS DE LAS TABLAS 
-            System.out.println("USANDO: "+nuevo.getAbsolutePath());
+            
+            this.registrosTablasActuales=cargarRegistros(nuevo);
+            
+            
+            
+            System.out.println(this.registrosTablasActuales.get("carro").getLista().toString());
             this.dirActual=dirBase+nombre;
+            System.out.println("USANDO: "+nuevo.getAbsolutePath());
+            
         }
         return(T)""; //To change body of generated methods, choose Tools | Templates.
     }
     
     private HashMap<String,ContenidoTabla> cargarRegistros(File folder){
-        
+        System.out.println("entro a llenar el hashmap para la db actual");
         File[] tablas = folder.listFiles();
         HashMap<String,ContenidoTabla> dataTablas=new HashMap();
         final Type tipoListaHashMap = new TypeToken< List <HashMap<String,String> > >(){}.getType();
@@ -286,48 +285,55 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         
         for (File tabla : tablas) {
-            
-//            crear el nuevo objeto para almacenar todos los registros de la tabla actual
-            ContenidoTabla readingTable=new ContenidoTabla();
-            
-            /*********************
-            * cargar en un string
-            * los registros de la tabla que voy leyendo
-           **********************/
-           try {
-               desGsoneado=getDatos(folder);
-           } catch (IOException ex) {
-               Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-           }
+            if(tabla.getName().contains("METADATA")){
+                
+            }else{
+                System.out.println("FILE SOBRE LA ITERACION " +tabla.getName());
+        //            crear el nuevo objeto para almacenar todos los registros de la tabla actual
+                    ContenidoTabla readingTable=new ContenidoTabla();
 
-           /*********************
-            * convertir el string anterior
-            * en un mapa si tiene al menos un registro
-           **********************/
-           if(desGsoneado.equals("[]")){
-               
-               
-               
-           }else{
-               
-               try{
-               datos= gson.fromJson(desGsoneado, tipoListaHashMap);
-               }catch(Exception e){}
-               
-               //agregar los registros al atributo de la lista
-               readingTable.setLista(new ArrayList<HashMap>(datos));
-               
-               
-           }
-           
-           
-//           AGREGAR EL LA TABLA CON SUS DATOS CARGADOS AL HASHMAP CREADO
-           
-        }
-        
-        
-        
-        return null;
+                    /*********************
+                    * cargar en un string
+                    * los registros de la tabla que voy leyendo
+                   **********************/
+                   try {
+                       desGsoneado=getDatos(tabla);
+                   } catch (IOException ex) {
+                       System.out.println(tabla.getAbsolutePath());
+                       Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+                   }
+
+                   /*********************
+                    * convertir el string anterior
+                    * en un mapa si tiene al menos un registro
+                   **********************/
+                   if(desGsoneado.equals("[]")){
+                       revVerb("la tabla "+tabla.getName()+" no tiene datos ingresados");
+
+
+                   }else{
+                       revVerb("la tabla "+tabla.getName()+" si tiene datos ingresados");
+                       try{
+                       datos= gson.fromJson(desGsoneado, tipoListaHashMap);
+                       }catch(Exception e){
+
+                       }
+                       System.out.println(desGsoneado);
+                       //agregar los registros al atributo de la lista
+                       ArrayList<HashMap> at=new ArrayList();
+                       at.addAll(datos);
+                       readingTable.setLista(at);
+                   }
+        //           AGREGAR EL LA TABLA CON SUS DATOS CARGADOS AL HASHMAP CREADO
+                   String nombre=tabla.getName();
+                   nombre=nombre.substring(0,nombre.indexOf("."));
+                   System.out.println("nombre de la tabla que voy cargando->"+nombre);
+                   dataTablas.put(nombre, readingTable);
+                }
+            
+            }
+            System.out.println(dataTablas.toString());
+            return dataTablas;
     }
     
     /******************
@@ -413,20 +419,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         } catch (IOException ex) {
             Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        /*
-        try {
-            List<DataBase> infoMDGeneral = this.getInfoMDGeneral();
-            if(infoMDGeneral!=null){
-                for (DataBase base : infoMDGeneral) {
-                    System.out.println(base.toString());
-                }
-            }else{
-                System.out.println("NO HAY DB's PARA MOSTRAR");
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        */
         
         return (T)"";
     }
@@ -505,7 +497,11 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     
         //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA
         hb=dirActual.substring(dirActual.indexOf("\\")+1);
-        
+        try {
+            WriteJSon();
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return (T)"";
     }
 
@@ -859,33 +855,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     /*************************
         IMPRIME LOS DATOS EXISTENTES EN LA METADA GENERAL
     *************************/
-    public void getMDglob(){
-        /*
-        String tN="DB's->[",tT="# Tablas->[";
-        for (int i = 0; i < this.metaDataGENERALDBnames.size(); i++) {
-            tN+=this.metaDataGENERALDBnames.get(i)+",";
-            tT+=this.metaDataGENERALDBnumTablas.get(i)+",";
-        }
-        tN+="]";
-        tT+="]";
-        
-        System.out.println(tN);
-        System.out.println(tT);
-        */
-        //return tN;
-    }
-
-    public void getMDloc(){
-        String tTabla="",tColumnas="",tTipos="";
-        
-        tTabla=this.metaDataLOCALTBnames.toString();
-        tColumnas=this.metaDataLOCALTBcolumnas.toString();
-        tTipos=this.metaDataLOCALTBtipos.toString();
-        
-        System.out.println("TABLAS->"+tTabla);
-        System.out.println("COLUMNAS->"+tColumnas);
-        System.out.println("TIPOS->"+tTipos);
-    }
     
     private void crearArchivo(String dir) throws IOException{
         File porCrear=new File(dir);
@@ -1015,10 +984,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
      * 
     *************************/
     
-    private void llenarRegistros(File archivo){
-        
-    }
-    
     /*************************
      * METODO QUE ELIMINA UNA DB EN LA METADA GENERAL 
      * 
@@ -1049,6 +1014,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
      /**************************
       *     METODO QUE ELIMINA UNA DB 
       *************************/
+    
     private void deleteDir(File file) {
         File[] contents = file.listFiles();
         if (contents != null) {
@@ -1058,6 +1024,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         file.delete();
     }
+    
     /****************************
      *  MÉTODO QUE VERIFICA EL USO DE UNA TABLE YA "ABIERTA" PARA OPTIMIZAR TIEMPO
      */

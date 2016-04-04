@@ -20,6 +20,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -31,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
  *
@@ -53,7 +55,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     private boolean verbose=false,
             bUse=false;
     private String hb="";
-    
+    private String TablaActual;
     private ArrayList<Table> metaDataActual;
     private HashMap<String,Table>tablasActuales;
     
@@ -343,7 +345,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         //crear clase para instanciar objetos en el insert
         Table classMaker = new Table(newTBName, columnNames, columnTypes);
         try {
-            
             classMaker.crear(dirActual.substring(dirActual.indexOf("\\")+1));
         } catch (IOException ex) {
             Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
@@ -456,9 +457,50 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         String td=ctx.ID().getText()+","+visit(ctx.type());
         return (T)td;
     }
-
+    
     @Override
     public T visitInsert(GramaticaParser.InsertContext ctx) {
+        try {
+            WriteJSon();
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (this.bUse){
+            for (Table table : tablasActuales.values()) {
+                System.out.println(table.toString());
+            }
+            System.out.println(this.tablasActuales.toString());
+            String NombreTabla = ctx.ID().getText(); 
+            System.out.println(ctx.ID().getText());//Obtengo Nombre de tabla, Columnas y Values.
+            List<TerminalNode> ids = ctx.insertColumns().ID();
+            List<GramaticaParser.ValueContext> values = ctx.insertValues().value();
+            if (ids.size() > values.size())                                                 
+                this.errores.add("Existen mas columnas de destino que expresiones.");              
+            else if ((ids.size() < values.size()) && (ids.size() > 0))
+                this.errores.add("Existen mas expresiones que columnas de destino.");
+            else {
+                if (tablasActuales.keySet().contains(NombreTabla)){                 //HACE FALTA AUMENTAR CANTIDAD DE REGISTROS
+                    Table TablaActual = tablasActuales.get(NombreTabla);
+                    if (ids.size() == 0){                                            // El caso en el cual no se ingrese ninguna columna, solamente Values (Predefinido)
+                        ArrayList<String> IDS = TablaActual.getIDs();
+                        if (values.size() > IDS.size()){
+                            this.errores.add("La cantidad de Valores a ingresar es mayor a la cantidad de columnas de la tabla: " + NombreTabla);
+                        } else{
+                            ArrayList<String> TiposDeTabla = TablaActual.getTipos();
+                            for (GramaticaParser.ValueContext value : values) {
+                                if (values.indexOf(value) < TiposDeTabla.size()-1){
+                                    //INSERTAR EN TABLA
+                                } else{
+                                    //INSERTAR NULL                                    
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    this.errores.add("No existe la relación: " + ctx.ID().getText());
+                }
+            }
+        }
         return (T)""; //To change body of generated methods, choose Tools | Templates.
     }
     
@@ -537,7 +579,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     
     @Override
     public T visitCharacter(GramaticaParser.CharacterContext ctx) {
-        return (T)ctx.getText();
+        return (T)("CHAR" + String.valueOf(ctx.getText().length()));
     }
 
     
@@ -759,6 +801,41 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         file.delete();
     }
+    /****************************
+     *  MÉTODO QUE VERIFICA EL USO DE UNA TABLE YA "ABIERTA" PARA OPTIMIZAR TIEMPO
+     */
     
+    public boolean TablaExistente(String NombreTabla){ 
+        /******
+         * Cambiar de tabla
+         */
+        
+        if ((this.TablaActual.length() == 0) || (TablaActual.equals(NombreTabla))){
+            TablaActual = NombreTabla;
+            return false;
+        }
+        else{
+            TablaActual = NombreTabla;
+            return true;
+        }
+    }
     
+    public void WriteJSon() throws DirectoryNotEmptyException, IOException{
+        try {
+            boolean success = Files.deleteIfExists(Paths.get(this.dirActual+"\\METADATA.json"));
+        } catch (IOException | SecurityException e) {
+            System.err.println(e);
+        }
+        File gen=new File(this.dirActual+"\\METADATA.json");
+        gen.createNewFile();
+        for(Table TableActual: tablasActuales.values()){
+            String Jsoneado = Gsoneador.toJson(TableActual);
+            Jsoneado = Jsoneado +"\n";
+            try {
+                Files.write(Paths.get(this.dirActual+"\\METADATA.json"), Jsoneado.getBytes(), StandardOpenOption.APPEND);
+            } catch (IOException ex) {
+                Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 }

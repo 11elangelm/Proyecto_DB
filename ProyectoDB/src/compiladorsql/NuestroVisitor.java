@@ -61,7 +61,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     
     private boolean verbose=false,
             bUse=false;
-    private String hb="";
+    private String tablaActualName="";
     private String TablaActual;
     private ArrayList<Table> metaDataActual;
     private HashMap<String,Table>tablasActuales;
@@ -75,6 +75,8 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     
     private String nameTablaActual="";
     private HashMap<String,ContenidoTabla> registrosTablasActuales;
+    
+    private String lastDB="";
     
 /****************************************************************************************************
                                         NO SE OLVIDEN DE
@@ -90,22 +92,16 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         this.metaDataActual=new ArrayList();
         this.tablasActuales=new HashMap();
         this.registrosTablasActuales=new HashMap();
-        this.metaDataLOCALTBnames=new ArrayList();
-        this.metaDataLOCALTBcolumnas=new ArrayList();
-        this.metaDataLOCALTBtipos=new ArrayList();
-        for (ParseTree child : ctx.children) 
+        
+        for (ParseTree child : ctx.statement()) 
         {
             visit(child);
-            /*try {
-            WriteJSon();
-            } catch (IOException ex) {
-            //Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-            }*/
+            
         }
-        
+            
+            writeData();
         return (T)"";
     }
-    
     
     
     /******************
@@ -232,79 +228,16 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
      * 
     *******************/
     
-    private List<String> prepareToAddTable(ArrayList<HashMap> lista){
-        System.out.println("voy a preparar estos mapas");
-                    /*for (HashMap mapa : lista) {
-                        System.out.println("mapa");
-                        for (Iterator it = mapa.entrySet().iterator(); it.hasNext();) {
-                            Map.Entry<String, String> entry = (Map.Entry<String, String>) it.next();
-                            String key = entry.getKey();
-                            String value = entry.getValue();
-                            System.out.println("key, " + key + " value " + value);
-                        }
-                    }*/
-        ArrayList<String> result=new ArrayList();
-        for (HashMap registro : lista) {
-            result.add(this.Gsoneador.toJson(registro));
-        }
-        System.out.println(result.toString());
-        return result;
-    }
-    
-    private void escribirTabla(List<String> data,File dir) throws IOException{
-        System.out.println("ESTO es lo que voy a escribir:"+data.toString());
-        dir.delete();
-        dir.createNewFile();
-        BufferedWriter bw = new BufferedWriter(new FileWriter(dir, true));
-        for (String dato : data) {
-            bw.write(dato);
-            bw.newLine();
-        }
-        bw.close();
-    }
-    
     @Override
     public T visitUsarDB(GramaticaParser.UsarDBContext ctx) {
-        if(!dirActual.equals("") && !dirActual.equals(dirBase+ctx.ID().getText())){
-            System.out.println("escribiedno los archivos de regreso a disco");
-            System.out.println("estas tablas estan cargadas en memoria");
-            Set<Map.Entry<String, ContenidoTabla>> entrySet = registrosTablasActuales.entrySet();
-            for (Map.Entry<String, ContenidoTabla> datos : entrySet) {
-                System.out.println("TABLA:"+datos.getKey());
-            }
-            File dir= new File(dirActual);
-            final File[] listFiles = dir.listFiles();
-//              RECORRER TODAS LAS TABLAS EXISTENTES PARA 
-            for (File tabla : listFiles) {
-                
-                
-                //FALTA MANEJAR CUANDO HAY NULLS QUE SIGNIFICA QUE NO HAY DATOS
-                
-//                REVISAR QUE EL NOMBRE DE LA TABLA QUE VOY A ESCRIBIR NO SEA EL DE LA METADATA
-                if(!tabla.getName().contains("METADATA")){
-                    String nombre=tabla.getName().substring(0, tabla.getName().indexOf("."));
-                    System.out.println("VOY A ESCRIBIR LA TABLA:"+tabla.getName());
-                    System.out.println(nombre);
-                    System.out.println(this.registrosTablasActuales.containsKey(nombre));
-                    ContenidoTabla content = this.registrosTablasActuales.get(nombre);
-                    
-                    if(content!=null){
-                        List<String> datos=prepareToAddTable(content.getLista());
-
-                        try {
-                            escribirTabla(datos,tabla);
-                        } catch (IOException ex) {
-                            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-            }
-            this.tablasActuales.clear();
-        }else{
-            System.out.println("no hay que sobreescribir archivos de regreso");
+        
+        writeData();
+        
+            //System.out.println("no hay que sobreescribir archivos de regreso");
             this.bUse=true;
             String nombre=ctx.ID().getText();
-            //una cosa nueva
+            this.lastDB=dirBase+nombre;
+            
             File nuevo = new File(dirBase+nombre);
 
             revVerb("Revisando que la DB "+nombre+" exista para ser usada");
@@ -348,107 +281,9 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 System.out.println("USANDO: "+nuevo.getAbsolutePath());
 
             }
-        }
+        
         
         return(T)""; //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    private HashMap<String,ContenidoTabla> cargarRegistros(File folder){
-        System.out.println("entro a llenar el hashmap para la db actual");
-        File[] tablas = folder.listFiles();
-        HashMap<String,ContenidoTabla> dataTablas=new HashMap();
-        final Type tipoListaHashMap = new TypeToken< List <HashMap<String,String> > >(){}.getType();
-        final Gson gson = new Gson();
-        List<HashMap<String,String>> datos=null;
-        String desGsoneado="";
-        
-        
-        
-        for (File tabla : tablas) {
-            if(tabla.getName().contains("METADATA")){
-                
-            }else{
-                System.out.println("FILE SOBRE LA ITERACION " +tabla.getName());
-        //            crear el nuevo objeto para almacenar todos los registros de la tabla actual
-                    ContenidoTabla readingTable=new ContenidoTabla();
-                    readingTable.setTabla(this.tablasActuales.get(tabla.getName()));
-
-                    /*********************
-                    * cargar en un string
-                    * los registros de la tabla que voy leyendo
-                   **********************/
-                   try {
-                       desGsoneado=getDatos(tabla);
-                   } catch (IOException ex) {
-                       System.out.println(tabla.getAbsolutePath());
-                       Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-                   }
-
-                   /*********************
-                    * convertir el string anterior
-                    * en un mapa si tiene al menos un registro
-                   **********************/
-                   if(desGsoneado.equals("[]")){
-                       revVerb("la tabla "+tabla.getName()+" no tiene datos ingresados");
-                   }else{
-                       revVerb("la tabla "+tabla.getName()+" si tiene datos ingresados");
-                       try{
-                       datos= gson.fromJson(desGsoneado, tipoListaHashMap);
-                       }catch(Exception e){
-
-                       }
-                       System.out.println(desGsoneado);
-                       /*
-                       for (HashMap<String, String> dato : datos) {
-                           System.out.println("HASHMAP");
-                           for (Map.Entry<String, String> entry : dato.entrySet()) {
-                                String key = entry.getKey().toString();
-                                String value = entry.getValue();
-                                System.out.println("key, " + key + " value " + value);
-                           }
-                       }*/
-                       //agregar los registros al atributo de la lista
-                       ArrayList<HashMap> at=new ArrayList();
-                       
-                       HashMap<String,String> ne=new HashMap();
-                       ne.put("marca", "porsche");
-                       ne.put("precio", "876.23");
-                       ne.put("id", "5");
-                       at.add(ne);
-                       
-                       at.addAll(datos);
-                       
-                       readingTable.setLista(at);
-                   }
-        //           AGREGAR EL LA TABLA CON SUS DATOS CARGADOS AL HASHMAP CREADO
-                   String nombre=tabla.getName();
-                   nombre=nombre.substring(0,nombre.indexOf("."));
-                   System.out.println("nombre de la tabla que voy cargando->"+nombre);
-                   dataTablas.put(nombre, readingTable);
-                }
-            
-            }
-            System.out.println(dataTablas.toString());
-            return dataTablas;
-    }
-    
-    /******************
-     * OBTENER EL STRING QUE ESTA ESCRITO EN EL 
-     * ARCHIVO.JSON QUE REPRESENTA LA TABLA
-     * QUE ESTOY LEYENDO
-    *******************/
-    
-    private String getDatos(File tabla) throws FileNotFoundException, IOException{
-        String arc="[";
-        
-        BufferedReader br = new BufferedReader(new FileReader(tabla));
-        String s;
-        while(((s=br.readLine())!=null)){
-            arc+=s+",";
-        }
-        br.close();
-        arc=arc.substring(0, arc.length()-1)+"]";
-        return arc;
     }
     
     /******************
@@ -532,11 +367,12 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     *******************/
     @Override
     public T visitCrearTB(GramaticaParser.CrearTBContext ctx) {
-        //Crear variables para usar en la instancia del classmaker
+        
+//Crear variables para usar en la instancia del classmaker
         //nombre
         String newTBName = ctx.ID().getText();
-        ArrayList<String> columnNames = new ArrayList<String>();
-        ArrayList<String> columnTypes = new ArrayList<String>();
+        ArrayList<String> columnNames = new ArrayList();
+        ArrayList<String> columnTypes = new ArrayList();
         this.revVerb("revisar si hay una DB en uso para crear la tabla");
         try {
             crearArchivo(this.dirActual + "\\" + newTBName+".json");
@@ -586,7 +422,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         //    Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
         //}
         //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA
-        hb=dirActual.substring(dirActual.indexOf("\\")+1);
+        tablaActualName=dirActual.substring(dirActual.indexOf("\\")+1);
         try {
             WriteJSon();
         } catch (IOException ex) {
@@ -597,19 +433,19 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
     //visitas para crear constraints
     @Override
-    public Object visitConstraintPK(GramaticaParser.ConstraintPKContext ctx) 
+    public T visitConstraintPK(GramaticaParser.ConstraintPKContext ctx) 
     {
         return (T)"";
     }
 
     @Override
-    public Object visitConstraintFK(GramaticaParser.ConstraintFKContext ctx) 
+    public T visitConstraintFK(GramaticaParser.ConstraintFKContext ctx) 
     {
         return (T)"";
     }
 
     @Override
-    public Object visitConstraintCheck(GramaticaParser.ConstraintCheckContext ctx) 
+    public T visitConstraintCheck(GramaticaParser.ConstraintCheckContext ctx) 
     {
         return (T)"";
     }
@@ -620,7 +456,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
      *
     *******************/
     @Override
-    public Object visitEliminarTB(GramaticaParser.EliminarTBContext ctx) 
+    public T visitEliminarTB(GramaticaParser.EliminarTBContext ctx) 
     {
         String tableName = ctx.ID().getText();
         //revisar que si exista la tabla
@@ -632,6 +468,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         //eliminar la tabla
         Table aRemover = this.tablasActuales.get(tableName);
         this.tablasActuales.remove(tableName);
+        this.registrosTablasActuales.remove(tableName);
         return (T)""; 
     }
     
@@ -697,9 +534,9 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     *******************/
     @Override
     public T visitAlterarTB(GramaticaParser.AlterarTBContext ctx) {
-        hb=ctx.ID().getText();
-        System.out.println("voy a alterar la TB:"+hb);
-        revVerb("voy a alterar la TB:"+hb);
+        tablaActualName=ctx.ID().getText();
+        System.out.println("voy a alterar la TB:"+tablaActualName);
+        revVerb("voy a alterar la TB:"+tablaActualName);
         return (T)visitChildren(ctx);
     }
      /******************
@@ -715,16 +552,18 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         this.revVerb("revisar si la columna que voy a insertar ya existe");
         
-        int ind=this.metaDataLOCALTBnames.indexOf(hb);
-        
         String data=(String)visit(ctx.columna());
         // retriebe table object from map and verify table 
-        if(this.tablasActuales.containsKey(hb) == false)
+        if(this.tablasActuales.containsKey(tablaActualName) == false)
         {
-            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + hb + " que no existe" );
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + tablaActualName + " que no existe" );
             return (T)"error al alterar tabla que no existe";
         }
-        Table tabla = this.tablasActuales.get(hb);
+        Table tabla = this.tablasActuales.get(tablaActualName);
+        
+        System.out.println("****************");
+        System.out.println(tabla.toString());
+        
         //separar el id pos 0 y el tipo pos 1 para agregarlos a las distintas listas
         String[] split = data.split(",");
         if(tabla.IDs.contains(split[0]))
@@ -734,12 +573,20 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         tabla.IDs.add(split[0]);
         tabla.Tipos.add(split[1]);
+        
+        System.out.println("****************");
+        System.out.println(tabla.toString());
+        
+        ContenidoTabla tablaXmodificar = this.registrosTablasActuales.get(tablaActualName);
+        if(tablaXmodificar!=null){
+            for (HashMap registro : tablaXmodificar.getLista()) {
+                registro.put(split[0], "");
+            }
+        }
         //buscar en 
 //      AGREGO LAS NUEVAS POSICIONES QUE VOY A NECESITAR MAS ADELANTE
-        
         //this.metaDataLOCALTBcolumnas.add(new ArrayList());//.get(i).add(split[0]);
         //this.metaDataLOCALTBtipos.add(new ArrayList());//.add(split[1]);
-
 //            AGREGO EL EL NOMBRE Y TIPO DE LA COLUMNA EN LA POSICION CORRESPONDIENTE A LA TABLA 
 //        REVISO QUE NO EXISTA UNA COLUMNA CON EL MISMO NOMBRE
         
@@ -755,16 +602,14 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitRenameTB(GramaticaParser.RenameTBContext ctx) {
         revVerb("voy a revisar si la tabla que voy a renombrar si existe");
-        /******************************
-            FALTA HACER LAS VALIDACIONES CON EL ARCHIVO XML
-        ******************************/
-        if(this.tablasActuales.containsKey(hb) == false)
+        
+        if(this.tablasActuales.containsKey(tablaActualName) == false)
         {
             for(int i=0; i<this.tablasActuales.size(); i++)
             {
                 System.out.println(this.tablasActuales.toString());
             }
-            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + hb + " que no existe" );
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + tablaActualName + " que no existe" );
             return (T)"error al renombrar bla bla tabla que no existe";
         }
         if(this.tablasActuales.containsKey(ctx.ID().getText()))
@@ -773,11 +618,24 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             return (T)"error al renombrar tabla con un nombre existente";
         }
         
-        Table tabla = this.tablasActuales.get(hb);
-        this.tablasActuales.remove(hb);
+        Table tabla = this.tablasActuales.get(tablaActualName);
+        
+        System.out.println("****************");
+        System.out.println(tabla.toString());
+        
+        this.tablasActuales.remove(tablaActualName);
         tabla.nombre = ctx.ID().getText();
         this.tablasActuales.put(ctx.ID().getText(), tabla);
         
+        System.out.println("****************");
+        System.out.println(tabla.toString());
+        
+        ContenidoTabla contenido = this.registrosTablasActuales.get(tablaActualName);
+        if(contenido!=null){
+            this.registrosTablasActuales.remove(tablaActualName);
+            contenido.setTabla(tabla);
+            this.registrosTablasActuales.put(tabla.getNombre(), contenido);
+        }
         return (T)""; 
         
     }
@@ -788,7 +646,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitDropColumnTB(GramaticaParser.DropColumnTBContext ctx) 
     {
-        String tableName = hb;
+        String tableName = tablaActualName;
         String columnName = ctx.ID().getText();
         //verificar si la tabla existe
         if(this.tablasActuales.containsKey(tableName) == false)
@@ -798,15 +656,31 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         //verificar si la columna existe
         Table tabla = this.tablasActuales.get(tableName);
+        
+        System.out.println("****************");
+        System.out.println(tabla.toString());
+        
         if(tabla.IDs.contains(columnName) == false)
         {
-            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + columnName + " que ya existe" );
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + columnName + " que no existe" );
             return (T)"error al eliminar columna que existe";
         }
         //eliminar la columna
+        
         int indice = tabla.IDs.indexOf(columnName);
         tabla.IDs.remove(indice);
         tabla.Tipos.remove(indice);
+        
+        System.out.println("****************");
+        System.out.println(tabla.toString());
+        
+        ContenidoTabla tablaXmodificar= this.registrosTablasActuales.get(tableName);
+        if(tablaXmodificar!=null){
+            for (HashMap registro : tablaXmodificar.getLista()) {
+                registro.remove(columnName);
+            }
+        }
+        
         return (T)"";    
         
     }
@@ -1213,5 +1087,202 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+    
+    private List<String> prepareToAddTable(ArrayList<HashMap> lista){
+        /*System.out.println("voy a preparar estos mapas");
+                    for (HashMap mapa : lista) {
+                        System.out.println("mapa");
+                        for (Iterator it = mapa.entrySet().iterator(); it.hasNext();) {
+                            Map.Entry<String, String> entry = (Map.Entry<String, String>) it.next();
+                            String key = entry.getKey();
+                            String value = entry.getValue();
+                            System.out.println("key, " + key + " value " + value);
+                        }
+                    }*/
+        ArrayList<String> result=new ArrayList();
+        for (HashMap registro : lista) {
+            result.add(this.Gsoneador.toJson(registro));
+        }
+        System.out.println(result.toString());
+        return result;
+    }
+    
+    private void escribirTabla(List<String> data,File dir) throws IOException{
+        //System.out.println("ESTO es lo que voy a escribir:"+data.toString());
+        dir.delete();
+        dir.createNewFile();
+        BufferedWriter bw = new BufferedWriter(new FileWriter(dir, true));
+        for (String dato : data) {
+            bw.write(dato);
+            bw.newLine();
+        }
+        bw.close();
+    }
+    
+    private void writeData(){
+        if(!this.lastDB.equals("")){
+            File dir= new File(this.lastDB);
+            final File[] listFiles = dir.listFiles();
+        //              RECORRER TODAS LAS TABLAS EXISTENTES PARA
+            if(!(listFiles!=null)||listFiles.length<1){
+            }else{
+                for (File tabla : listFiles) {
+
+        //                REVISAR QUE EL NOMBRE DE LA TABLA QUE VOY A ESCRIBIR NO SEA EL DE LA METADATA
+                    if(!tabla.getName().contains("METADATA")){
+                        String nombre=tabla.getName().substring(0, tabla.getName().indexOf("."));
+                        System.out.println("VOY A ESCRIBIR LA TABLA:"+tabla.getName());
+                        System.out.println(nombre);
+                        System.out.println(this.registrosTablasActuales.containsKey(nombre));
+                        ContenidoTabla content = this.registrosTablasActuales.get(nombre);
+
+                        if(content!=null){
+                            List<String> datos=prepareToAddTable(content.getLista());
+
+                            try {
+                                escribirTabla(datos,tabla);
+                            } catch (IOException ex) {
+                                System.err.println("ERROR AL ESCRIBIR DE REGRESO LOS DATOS DE LA DB"+this.lastDB);
+                                //Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    }
+                }
+                this.tablasActuales.clear();
+            }
+            
+            try {
+                WriteJSon();
+            } catch (IOException ex) {
+                //Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+    }
+    
+    /************************
+     * ESTE METODO DEVUELVE LOS DATOS DE LA DB
+     * CARGAADOS EN LAS ESTRUCTURAS DE MEMORIA
+     * PARA SU USO Y MODIFICACION
+    *************************/
+    private HashMap<String,ContenidoTabla> cargarRegistros(File folder){
+        System.out.println("entro a llenar el hashmap para la db actual");
+        System.out.println("el dir actual es->"+dirActual);
+        File[] tablas = folder.listFiles();
+        HashMap<String,ContenidoTabla> dataTablas=new HashMap();
+        final Type tipoListaHashMap = new TypeToken< List <HashMap<String,String> > >(){}.getType();
+        final Gson gson = new Gson();
+        List<HashMap<String,String>> datos=null;
+        String desGsoneado="";
+        
+        
+        
+        for (File tabla : tablas) {
+            if(tabla.getName().contains("METADATA")){
+                
+            }else{
+                System.out.println("FILE SOBRE LA ITERACION " +tabla.getName());
+        //            crear el nuevo objeto para almacenar todos los registros de la tabla actual
+                    ContenidoTabla readingTable=new ContenidoTabla();
+                    readingTable.setTabla(this.tablasActuales.get(tabla.getName()));
+
+                    /*********************
+                    * cargar en un string
+                    * los registros de la tabla que voy leyendo
+                   **********************/
+                   try {
+                       desGsoneado=getDatos(tabla);
+                   } catch (IOException ex) {
+                       System.out.println(tabla.getAbsolutePath());
+                       Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+                   }
+
+                   /*********************
+                    * convertir el string anterior
+                    * en un mapa si tiene al menos un registro
+                   **********************/
+                   if(desGsoneado.equals("[]")){
+                       revVerb("la tabla "+tabla.getName()+" no tiene datos ingresados");
+                   }else{
+                       revVerb("la tabla "+tabla.getName()+" si tiene datos ingresados");
+                       try{
+                       datos= gson.fromJson(desGsoneado, tipoListaHashMap);
+                       }catch(Exception e){
+
+                       }
+                       System.out.println(desGsoneado);
+                       /*
+                       for (HashMap<String, String> dato : datos) {
+                           System.out.println("HASHMAP");
+                           for (Map.Entry<String, String> entry : dato.entrySet()) {
+                                String key = entry.getKey().toString();
+                                String value = entry.getValue();
+                                System.out.println("key, " + key + " value " + value);
+                           }
+                       }*/
+                       
+                       //agregar los registros al atributo de la lista
+                       ArrayList<HashMap> at=new ArrayList();
+                       /*
+                       if(tabla.getName().contains("carro")){
+                        HashMap<String,String> ne=new HashMap();
+                        ne.put("marca", "maserati");
+                        ne.put("precio", "9876.23");
+                        ne.put("id", "14");
+                        at.add(ne);
+                        
+                       }else{
+                           if(tabla.getName().contains("local")){
+                               HashMap<String,String> ne=new HashMap();
+                                ne.put("apertura", "saber77");
+                                ne.put("direccion", "zona 8");
+                                ne.put("empleados", "5");
+                                at.add(ne);
+                           }else{
+                               HashMap<String,String> ne=new HashMap();
+                                ne.put("nombre", "porsche");
+                                ne.put("sueldo", "876.23");
+                                ne.put("nacimiento", "saber99");
+                                at.add(ne);
+                           }
+                       }
+                       */
+                       if((datos!=null) && datos.size()>0){
+                           at.addAll(datos);
+                       }
+                       
+                       
+                       readingTable.setLista(at);
+                   }
+        //           AGREGAR EL LA TABLA CON SUS DATOS CARGADOS AL HASHMAP CREADO
+                   String nombre=tabla.getName();
+                   nombre=nombre.substring(0,nombre.indexOf("."));
+                   System.out.println("nombre de la tabla que voy cargando->"+nombre);
+                   dataTablas.put(nombre, readingTable);
+                }
+            
+            }
+            System.out.println(dataTablas.toString());
+            return dataTablas;
+    }
+    
+    /******************
+     * OBTENER EL STRING QUE ESTA ESCRITO EN EL 
+     * ARCHIVO.JSON QUE REPRESENTA LA TABLA
+     * QUE ESTOY LEYENDO
+    *******************/
+    
+    private String getDatos(File tabla) throws FileNotFoundException, IOException{
+        String arc="[";
+        
+        BufferedReader br = new BufferedReader(new FileReader(tabla));
+        String s;
+        while(((s=br.readLine())!=null)){
+            arc+=s+",";
+        }
+        br.close();
+        arc=arc.substring(0, arc.length()-1)+"]";
+        return arc;
     }
 }

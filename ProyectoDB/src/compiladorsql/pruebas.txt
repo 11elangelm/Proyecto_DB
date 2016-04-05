@@ -74,3 +74,48 @@ use database liga
 {"marca":"bmw","precio":"13564.65","id":"2"}
 {"marca":"mercedes","precio":"14564.65","id":"3"}
 {"marca":"ferrari","precio":"15564.65","id":"4"}
+
+
+{"nombre":"roberto","sueldo":"100.3","nacimiento":"duda1"}
+{"nombre":"juan carlos","sueldo":"65.23","nacimiento":"duda2"}
+{"nombre":"angel","sueldo":"86.12","nacimiento":"duda3"}
+{"nombre":"javier","sueldo":"77.12","nacimiento":"duda4"}
+
+{"apertura":"saber1","empleados":"6","direccion":"zona 1"}
+{"apertura":"saber2","empleados":"11","direccion":"zona 2"}
+{"apertura":"saber3","empleados":"20","direccion":"zona 3"}
+{"apertura":"saber4","empleados":"12","direccion":"zona 4"}
+{"apertura":"saber5","empleados":"31","direccion":"zona 7"}
+
+//create database burguerking;
+//use database burguerking;
+//create table empleado(nombre char(12),sueldo float,nacimiento date);
+//create table local(apertura date, empleados int, direccion char(33));
+use database agencia;
+use database liga;
+
+
+create database pruebas;
+use database pruebas;
+create table nueva(nombre int, edad int);
+
+
+{"nombre":"12","edad":"22"}
+{"nombre":"13","edad":"82"}
+{"nombre":"14","edad":"59"}
+
+
+create database pruebas;
+use database pruebas;
+create table nueva (dedos int);
+alter table nueva add column edad int;
+alter table nueva rename to persona;
+alter table persona drop column dedos
+
+
+create database pruebas;
+use database pruebas;
+create table nueva (dedos int);
+alter table nueva add column edad int;
+alter table nueva rename to persona;
+alter table persona drop column dedos

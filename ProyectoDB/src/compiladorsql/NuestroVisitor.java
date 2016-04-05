@@ -100,6 +100,12 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
             
             writeData();
+            
+        try {
+            this.WriteJSon();
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return (T)"";
     }
     
@@ -233,56 +239,58 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         writeData();
         
-            //System.out.println("no hay que sobreescribir archivos de regreso");
-            this.bUse=true;
-            String nombre=ctx.ID().getText();
-            this.lastDB=dirBase+nombre;
-            
-            File nuevo = new File(dirBase+nombre);
+        this.tablasActuales.clear();
 
-            revVerb("Revisando que la DB "+nombre+" exista para ser usada");
-            if(!nuevo.isDirectory()){
-                revVerb("La DB buscada no existe");
-                this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede usar la DB:"+nombre+" porque no existe");
-                return(T)"error buscando la DB para uso";
-            }
+        //System.out.println("no hay que sobreescribir archivos de regreso");
+        this.bUse=true;
+        String nombre=ctx.ID().getText();
+        this.lastDB=dirBase+nombre;
 
-            revVerb("La DB buscada si existe");
+        File nuevo = new File(dirBase+nombre);
+
+        revVerb("Revisando que la DB "+nombre+" exista para ser usada");
+        if(!nuevo.isDirectory()){
+            revVerb("La DB buscada no existe");
+            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no se puede usar la DB:"+nombre+" porque no existe");
+            return(T)"error buscando la DB para uso";
+        }
+
+        revVerb("La DB buscada si existe");
 //            LIMPIAR LAS VARIABLES QUE VAN A SERVIR EN MEMORIA
-            
-            
+
+
 //            LLENAR EL ARRAY CON LA DATA PRESENTE EN LAS TABLAS
-            List<Table> infoMDLocal=null;
-            try {
-                infoMDLocal=(getInfoMDLocal(dirBase+nombre));
-            } catch (IOException ex) {
-                Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        List<Table> infoMDLocal=null;
+        try {
+            infoMDLocal=(getInfoMDLocal(dirBase+nombre));
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-            if( !(infoMDLocal!=null) || infoMDLocal.size()<1 ){
+        if( !(infoMDLocal!=null) || infoMDLocal.size()<1 ){
 
-                this.dirActual=dirBase+nombre;
-            }else{
-                System.out.println("las DB cargada si tiene tablas creadas");
-        //        cargar las tablas existentes en la tabla
-                if(infoMDLocal!=null){
-                    for (Table tabla : infoMDLocal) {
-            //            agregar al mapa que le sirve a Angel
-                        this.tablasActuales.put(tabla.getNombre(), tabla);
-            //          AGREGAR AL ARRAY QUE LE SIRVE A CANTEO
-                        this.metaDataActual.add(tabla);
-                    }
+            this.dirActual=dirBase+nombre;
+        }else{
+            System.out.println("las DB cargada si tiene tablas creadas");
+    //        cargar las tablas existentes en la tabla
+            if(infoMDLocal!=null){
+                for (Table tabla : infoMDLocal) {
+        //            agregar al mapa que le sirve a Angel
+                    this.tablasActuales.put(tabla.getNombre(), tabla);
+        //          AGREGAR AL ARRAY QUE LE SIRVE A CANTEO
+                    this.metaDataActual.add(tabla);
                 }
-                System.out.println(Arrays.toString(nuevo.list()));
-                
-        //        CARGAR EL CONTENIDO DE LOS REGISTROS DE LAS TABLAS 
-                this.registrosTablasActuales=cargarRegistros(nuevo);
-                this.dirActual=dirBase+nombre;
-                System.out.println("USANDO: "+nuevo.getAbsolutePath());
-
             }
-        
-        
+            System.out.println(Arrays.toString(nuevo.list()));
+
+    //        CARGAR EL CONTENIDO DE LOS REGISTROS DE LAS TABLAS 
+            this.registrosTablasActuales=cargarRegistros(nuevo);
+            this.dirActual=dirBase+nombre;
+            System.out.println("USANDO: "+nuevo.getAbsolutePath());
+
+        }
+
+
         return(T)""; //To change body of generated methods, choose Tools | Templates.
     }
     
@@ -423,11 +431,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         //}
         //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA
         tablaActualName=dirActual.substring(dirActual.indexOf("\\")+1);
-        try {
-            WriteJSon();
-        } catch (IOException ex) {
-            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
         return (T)"";
     }
 
@@ -573,6 +577,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         tabla.IDs.add(split[0]);
         tabla.Tipos.add(split[1]);
+        tabla.columnas.put(split[0], split[1]);
         
         System.out.println("****************");
         System.out.println(tabla.toString());
@@ -1149,14 +1154,14 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                         }
                     }
                 }
-                this.tablasActuales.clear();
+                this.registrosTablasActuales.clear();
             }
-            
+            /*
             try {
                 WriteJSon();
             } catch (IOException ex) {
                 //Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            }*/
         }
         
     }

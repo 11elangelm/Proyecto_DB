@@ -386,6 +386,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             crearArchivo(this.dirActual + "\\" + newTBName+".json");
         } catch (IOException ex) {
             Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+            return (T)"error al crear nuevo archivo para la tabla escogida";
         }
         if(!this.bUse){
             revVerb("no hay DB seleccionada");
@@ -473,6 +474,9 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         Table aRemover = this.tablasActuales.get(tableName);
         this.tablasActuales.remove(tableName);
         this.registrosTablasActuales.remove(tableName);
+        
+        File nf=new File(dirActual+"\\"+tableName+".json");
+        nf.delete();
         return (T)""; 
     }
     
@@ -635,6 +639,9 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         System.out.println("****************");
         System.out.println(tabla.toString());
         
+        File old=new File(dirActual+"\\"+tablaActualName+".json");
+        old.renameTo(new File(dirActual+"\\"+ctx.ID().getText()+".json"));
+        
         ContenidoTabla contenido = this.registrosTablasActuales.get(tablaActualName);
         if(contenido!=null){
             this.registrosTablasActuales.remove(tablaActualName);
@@ -675,6 +682,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         int indice = tabla.IDs.indexOf(columnName);
         tabla.IDs.remove(indice);
         tabla.Tipos.remove(indice);
+        tabla.columnas.remove(columnName);
         
         System.out.println("****************");
         System.out.println(tabla.toString());
@@ -1207,7 +1215,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                     * convertir el string anterior
                     * en un mapa si tiene al menos un registro
                    **********************/
-                   if(desGsoneado.equals("[]")){
+                   if(desGsoneado.equals("]")){
                        revVerb("la tabla "+tabla.getName()+" no tiene datos ingresados");
                    }else{
                        revVerb("la tabla "+tabla.getName()+" si tiene datos ingresados");

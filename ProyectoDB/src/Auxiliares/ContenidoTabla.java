@@ -52,5 +52,7 @@ public class ContenidoTabla {
         }
     }
     
-    
+    public void addRegistro(HashMap entrada){
+        this.lista.add(entrada);
+    }
 }

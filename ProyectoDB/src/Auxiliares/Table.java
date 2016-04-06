@@ -28,6 +28,12 @@ public class Table {
     
     public HashMap<String,String> columnas=new HashMap();
 
+    public HashMap<String, String> getColumnas() {
+        return columnas;
+    }
+    
+    
+
     public Table(){}
     public Table(String name,ArrayList<String> IDs, ArrayList<String> Tipos) 
     {

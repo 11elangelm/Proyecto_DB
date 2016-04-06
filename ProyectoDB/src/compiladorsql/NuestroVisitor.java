@@ -506,6 +506,12 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitEliminarTB(GramaticaParser.EliminarTBContext ctx) 
     {
+        if(!this.bUse){
+            revVerb("no hay DB seleccionada");
+            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no pueder crear una tabla porque no hay DB seleccionada");
+            return (T)"error porque no hay DB elegida";
+            
+        }
         String tableName = ctx.ID().getText();
         //revisar que si exista la tabla
         if(this.tablasActuales.containsKey(tableName) == false)
@@ -590,8 +596,14 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     *******************/
     @Override
     public T visitAlterarTB(GramaticaParser.AlterarTBContext ctx) {
+        if(!this.bUse){
+            revVerb("no hay DB seleccionada");
+            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no pueder crear una tabla porque no hay DB seleccionada");
+            return (T)"error porque no hay DB elegida";
+            
+        }
         tablaActualName=ctx.ID().getText();
-        System.out.println("voy a alterar la TB:"+tablaActualName);
+//        System.out.println("voy a alterar la TB:"+tablaActualName);
         revVerb("voy a alterar la TB:"+tablaActualName);
         return (T)visitChildren(ctx);
     }
@@ -755,15 +767,104 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         String td=ctx.ID().getText()+","+visit(ctx.type());
         return (T)td;
     }
+
+    @Override
+    public T visitInsertValues(GramaticaParser.InsertValuesContext ctx) {
+        List<String> nombres=new ArrayList();
+        for (GramaticaParser.ValueContext value : ctx.value()) {
+            nombres.add((String) visit(value));
+        }
+        return (T)nombres;
+    }
+
+    @Override
+    public T visitInsertColumns(GramaticaParser.InsertColumnsContext ctx) {
+        List<String> nombres=new ArrayList();
+        for (TerminalNode ID : ctx.ID()) {
+            nombres.add(ID.getText());
+        }
+        return (T)nombres;
+    }
     
     @Override
     public T visitInsert(GramaticaParser.InsertContext ctx) {
-//        try {
-//            WriteJSon();
-//        } catch (IOException ex) {
-//            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        if (this.bUse){
+        
+        if(!this.bUse){
+            revVerb("no hay DB seleccionada");
+            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede crear una tabla porque no hay DB seleccionada");
+            return (T)"error porque no hay DB elegida";
+            
+        }
+        
+        String nameTabla=ctx.ID().getText();
+        revVerb("buscando la tabla "+nameTabla);
+        Table tabla = this.tablasActuales.get(nameTabla);
+        
+//        REVISAR QUE LA TABLA SI EXISTA
+        if(!(tabla!=null)){
+            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque esta no existe");
+            return (T)"error porque no existe la tabla escogida";
+        }
+        
+//        REVISAR SI LA LISTA DE COLUMNAS FUE PROVISTA POR EL USUARIO O SIMPLEMENTE USO EL ORDEN IMPLÍCITO
+        List<String> orden = (List<String>)visit(ctx.insertColumns());
+        List<String> valores;
+        HashMap tmp;
+        
+        if(orden.size()>0){
+            
+            System.out.println("si hay lista de colunas!!!!");
+//            REVISAR QUE EL NUMERO DE COLUMNAS Y EL DE VALORES COINCIDA
+            valores=(List<String>) visit(ctx.insertValues());
+            if(valores.size()!=orden.size()){
+                this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el numero de columnas provista no es el mismo que el numero de valores para insertar");
+                return (T)"error porque no coincide el numero de columnas provistas con el de valores";
+            }
+            revVerb("el numero de columas por insertar si coincide con el numero de valores provistos");
+            ContenidoTabla registros = this.registrosTablasActuales.get(nameTabla);
+            
+            System.out.println(orden.toString());
+            System.out.println(valores.toString());
+            
+            
+//            REVISAR SI LA TABLA YA TIENE CONTENIDO EXISTENTE
+            if(registros!=null){
+                
+                System.out.println("la tabla ya tiene datos");
+            }else{
+                
+                System.out.println("la tabla no tiene datos");
+                ContenidoTabla cont = new ContenidoTabla();
+                cont.setTabla(tabla);
+                
+                /************************
+                 *          FALTA REVISAR LO DE LAS CONSTRAINTS
+                 ************************/
+                
+                tmp=new HashMap();
+                
+                
+                /************************
+                 * REVISAR QUE EL TIPO DE LAS COLUMNAS COINCIDA
+                 ************************/
+                HashMap<String, String> columnas = tabla.getColumnas();
+                for (int i = 0; i < orden.size(); i++) {
+                    
+                    String idColumna=orden.get(i);
+                    String tipoColumna = columnas.get(idColumna);
+                    
+                }
+                
+                
+            }
+        }else{
+            revVerb("se va a insertar en el orden predefinido");
+            System.out.println("no hay lista jajaja");
+            valores=(List<String>) visit(ctx.insertValues());
+        }
+
+        
+        /*if (this.bUse){
             for (Table table : tablasActuales.values()) {
                 System.out.println(table.toString());
             }
@@ -799,7 +900,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                     this.errores.add("No existe la relación: " + ctx.ID().getText());
                 }
             }
-        }
+        }*/
         return (T)""; //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -823,23 +924,19 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     public T visitTipoFloat(GramaticaParser.TipoFloatContext ctx) {
         return (T)"float";
     }
-    
-    
-    
-    @Override
-    public T visitValue(GramaticaParser.ValueContext ctx) {
-        
-        return (T)visitChildren(ctx);
-    }
 
     @Override
     public T visitEntero(GramaticaParser.EnteroContext ctx) {
-        return(T) ctx.getText();
+        String t="int-";
+        t+=ctx.getText();
+        return(T) t;
     }
     
     @Override
     public T visitDecimal(GramaticaParser.DecimalContext ctx) {
-        return (T)ctx.getText(); //To change body of generated methods, choose Tools | Templates.
+        String t="float-";
+        t+=ctx.getText();
+        return (T)t; //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -871,12 +968,16 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             return(T)"error en la el dia de febrero";
         }
         
-        return (T)ctx.getText(); //To change body of generated methods, choose Tools | Templates.
+        String t="date-";
+        t+=ctx.getText();
+        return (T)t; //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override
     public T visitCharacter(GramaticaParser.CharacterContext ctx) {
-        return (T)("CHAR" + String.valueOf(ctx.getText().length()));
+        String t="char-";
+        t+=ctx.getText();
+        return (T)t;
     }
 
     
@@ -1280,7 +1381,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             if(tabla.getName().contains("METADATA")){
                 
             }else{
-                System.out.println("FILE SOBRE LA ITERACION " +tabla.getName());
+//                System.out.println("FILE SOBRE LA ITERACION " +tabla.getName());
         //            crear el nuevo objeto para almacenar todos los registros de la tabla actual
                     ContenidoTabla readingTable=new ContenidoTabla();
                     readingTable.setTabla(this.tablasActuales.get(tabla.getName()));
@@ -1357,7 +1458,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         //           AGREGAR EL LA TABLA CON SUS DATOS CARGADOS AL HASHMAP CREADO
                    String nombre=tabla.getName();
                    nombre=nombre.substring(0,nombre.indexOf("."));
-                   System.out.println("nombre de la tabla que voy cargando->"+nombre);
+//                   System.out.println("nombre de la tabla que voy cargando->"+nombre);
                    dataTablas.put(nombre, readingTable);
                 }
             
@@ -1384,4 +1485,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         arc=arc.substring(0, arc.length()-1)+"]";
         return arc;
     }
+    
+    
 }

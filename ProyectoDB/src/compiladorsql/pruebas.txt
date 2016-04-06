@@ -145,3 +145,13 @@ create database agencia;
 use database agencia;
 create table carro(marca char(20),precio float,id int);
 create table cosas(dedos int, marca float, precio int);
+
+
+
+drop database compus;
+create database compus;
+use database compus
+create table mesa (ram int,framerate float);
+alter table mesa add column marca char (22);
+insert into mesa (marca,ram) values('asus',123.32);
+show tables;

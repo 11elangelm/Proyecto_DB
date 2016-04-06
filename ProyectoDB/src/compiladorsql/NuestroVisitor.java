@@ -97,13 +97,16 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         this.bases=new HashMap();
         
         this.cargarBases();
-        
+        long startTime = System.nanoTime();
+
         for (ParseTree child : ctx.statement()) 
         {
             visit(child);
             
         }
-            
+        long estimatedTime = System.nanoTime() - startTime;
+        estimatedTime=(long) (estimatedTime*0.000001);
+        System.out.println("Tiempo total->"+estimatedTime+" ms");
             writeData();
             escribirMD();
         try {
@@ -471,7 +474,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA
 //        System.out.println("***********************->"+this.dirActual);
         String nameDB=this.dirActual.substring(this.dirActual.lastIndexOf("\\")+1);
-//        System.out.println(nameDB);
+        System.out.println(nameDB);
         DataBase get = this.bases.get(nameDB);
         get.setNumTablas(get.getNumTablas()+1);
         tablaActualName=dirActual.substring(dirActual.indexOf("\\")+1);
@@ -813,7 +816,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         if(orden.size()>0){
             
-            System.out.println("si hay lista de colunas!!!!");
+//            System.out.println("si hay lista de colunas!!!!");
 //            REVISAR QUE EL NUMERO DE COLUMNAS Y EL DE VALORES COINCIDA
             valores=(List<String>) visit(ctx.insertValues());
             if(valores.size()!=orden.size()){
@@ -821,86 +824,109 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 return (T)"error porque no coincide el numero de columnas provistas con el de valores";
             }
             revVerb("el numero de columas por insertar si coincide con el numero de valores provistos");
-            ContenidoTabla registros = this.registrosTablasActuales.get(nameTabla);
-            
-            System.out.println(orden.toString());
-            System.out.println(valores.toString());
-            
+            ContenidoTabla registros = this.registrosTablasActuales.get(nameTabla);            
             
 //            REVISAR SI LA TABLA YA TIENE CONTENIDO EXISTENTE
-            if(registros!=null){
+            if(!(registros!=null)){
                 
-                System.out.println("la tabla ya tiene datos");
-            }else{
+                /*************************
+                 * SI LA TABLA ESTA VACIA CREO UNA NUEVO OBJETO PARA ALMACENAR SUS REGISTROS
+                 **************************/
                 
-                System.out.println("la tabla no tiene datos");
+//                System.out.println("la tabla no tiene datos");
                 ContenidoTabla cont = new ContenidoTabla();
                 cont.setTabla(tabla);
-                
-                /************************
-                 *          FALTA REVISAR LO DE LAS CONSTRAINTS
-                 ************************/
-                
-                tmp=new HashMap();
-                
-                
-                /************************
-                 * REVISAR QUE EL TIPO DE LAS COLUMNAS COINCIDA
-                 ************************/
-                HashMap<String, String> columnas = tabla.getColumnas();
-                for (int i = 0; i < orden.size(); i++) {
-                    
-                    String idColumna=orden.get(i);
-                    String tipoColumna = columnas.get(idColumna);
-                    
-                }
-                
-                
+                this.registrosTablasActuales.put(tabla.getNombre(), cont);
+                registros=this.registrosTablasActuales.get(tabla.getNombre());
             }
+            /************************
+             *          FALTA REVISAR LO DE LAS CONSTRAINTS
+             ************************/
+
+            tmp=new HashMap();
+
+
+            /************************
+             * REVISAR QUE EL TIPO DE LAS COLUMNAS COINCIDA
+             * SEGUN EL ORDEN QUE EL USUARIO DEFINIÓ
+             ************************/
+            HashMap<String, String> columnas = tabla.getColumnas();
+
+            for (int i = 0; i < tabla.IDs.size(); i++) {
+                String columna=tabla.IDs.get(i);
+
+                if(orden.contains(columna)){
+                    int indice=orden.indexOf(columna);
+                    String val=valores.get(i);
+                    String nombreColumnaXinsertar=orden.get(i);
+                    String tipoColumnaXinsertar=val.substring(0,val.indexOf("-"));
+                    String valorColumnaXinsertar=val.substring(val.indexOf("-")+1);
+                    String tipoColumnaEsperado = columnas.get(nombreColumnaXinsertar);
+
+//                    REVISAR SI EL TIPO DE LOS VALORES X INSERTAR COINCIDE CON EL ESPERADO
+
+//                    EL SWITCH SE HACE XQ PUEDE EXISTIR LA CONVERSION FORZOSA EN LOS INT Y FLOAT
+                    switch(tipoColumnaEsperado){
+                        case("int"):
+//                            LOS UNICOS TIPOS DE DATOS QUE PUEDO CONVERTIR SON INT Y FLOAT
+                            switch(tipoColumnaXinsertar){
+                                case "float":
+                                    tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar.substring(0, valorColumnaXinsertar.indexOf(".")));
+                                    break;
+                                case "int":
+                                    tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar);
+                                    break;
+                                default:
+                                    if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
+                                        this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tipo de "+valorColumnaXinsertar+" es: ("+tipoColumnaXinsertar+") y esperaba: ("+tipoColumnaEsperado+")");
+                                        return (T)"error porque no coincide el tipo de columnas provistas para insertar con el tipo de valores para insertar";
+                                    }
+                                    break;
+                            }
+
+                            break;
+                        case("float"):
+
+                            switch(tipoColumnaXinsertar){
+                                case "float":
+                                    tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar);
+                                    break;
+                                case "int":
+                                    tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar+".0");
+                                    break;
+                                default:
+                                    if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
+                                        this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tipo de "+valorColumnaXinsertar+" es: ("+tipoColumnaXinsertar+") y esperaba: ("+tipoColumnaEsperado+")");
+                                        return (T)"error porque no coincide el tipo de columnas provistas para insertar con el tipo de valores para insertar";
+                                    }
+                                    break;
+                            }
+
+                            break;
+                        default:
+                            if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
+                                this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tipo de "+valorColumnaXinsertar+" es: ("+tipoColumnaXinsertar+") y esperaba: ("+tipoColumnaEsperado+")");
+                                return (T)"error porque no coincide el tipo de columnas provistas para insertar con el tipo de valores para insertar";
+                            }
+                            tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar);
+                            break;
+                    }
+
+                }else{
+                    tmp.put(columna, "");
+                }
+            }
+            
+            //AQUI ESTABA LO DEL FOR DE ARRIBA ANTES
+            
+            registros.addRegistro(tmp);
+            
         }else{
             revVerb("se va a insertar en el orden predefinido");
             System.out.println("no hay lista jajaja");
             valores=(List<String>) visit(ctx.insertValues());
         }
-
         
-        /*if (this.bUse){
-            for (Table table : tablasActuales.values()) {
-                System.out.println(table.toString());
-            }
-            System.out.println(this.tablasActuales.toString());
-            String NombreTabla = ctx.ID().getText(); 
-            System.out.println(ctx.ID().getText());//Obtengo Nombre de tabla, Columnas y Values.
-            List<TerminalNode> ids = ctx.insertColumns().ID();
-            List<GramaticaParser.ValueContext> values = ctx.insertValues().value();
-            if (ids.size() > values.size())                                                 
-                this.errores.add("Existen mas columnas de destino que expresiones.");              
-            else if ((ids.size() < values.size()) && (ids.size() > 0))
-                this.errores.add("Existen mas expresiones que columnas de destino.");
-            else {
-                if (tablasActuales.keySet().contains(NombreTabla)){                 //HACE FALTA AUMENTAR CANTIDAD DE REGISTROS
-                    Table TablaActual = tablasActuales.get(NombreTabla);
-                    if (ids.size() == 0){                                            // El caso en el cual no se ingrese ninguna columna, solamente Values (Predefinido)
-                        ArrayList<String> IDS = TablaActual.getIDs();
-                        if (values.size() > IDS.size()){
-                            this.errores.add("La cantidad de Valores a ingresar es mayor a la cantidad de columnas de la tabla: " + NombreTabla);
-                        } else{
-                            ArrayList<String> TiposDeTabla = TablaActual.getTipos();
-                            for (GramaticaParser.ValueContext value : values) {
-                                if (values.indexOf(value) < TiposDeTabla.size()-1){
-//                                    if (TiposDeTabla.contains(value.)) 
-                                    //INSERTAR EN TABLA
-                                } else{
-                                    //INSERTAR NULL                                    
-                                }
-                            }
-                        }
-                    }
-                }else{
-                    this.errores.add("No existe la relación: " + ctx.ID().getText());
-                }
-            }
-        }*/
         return (T)""; //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -951,6 +977,43 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         int month=Integer.parseInt(ctx.getText().substring(6, 8));
         int day=Integer.parseInt(ctx.getText().substring(9,11));
         //REVISAR QUE EL MES SEA VALIDO
+        
+        switch (month) {
+            case 1: case 3: case 5:
+            case 7: case 8: case 10:
+            case 12:
+                if(day>31){
+                    this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), Los meses no deben tener mas de 31 dias");
+                    return(T)"error en el numero de dia";
+                }
+                break;
+            case 4: case 6:
+            case 9: case 11:
+                if(day>30){
+                    this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), Los meses no deben tener mas de 30 dias");
+                    return(T)"error en el numero de dia";
+                }
+                break;
+            case 2:
+                if (((year % 4 == 0) && 
+                     !(year % 100 == 0))
+                     || (year % 400 == 0))
+                    if(day>29){
+                        this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), Febrero no puede tener mas de 29 dias");
+                        return(T)"error en la el dia de febrero";
+                    }
+                else
+                    if(day>28){
+                        this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), Febrero no puede tener mas de 28 dias");
+                        return(T)"error en la el dia de febrero";
+                    }
+                break;
+            default:
+                this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), Los meses no deben ser mayores a 12");
+                return(T)"error en el numero de mes";
+                
+        }
+        /*
         if(month>12){
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), Los meses no deben ser mayores a 12");
             return(T)"error en el numero de mes";
@@ -967,7 +1030,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), Febrero no puede tener mas de 29 dias");
             return(T)"error en la el dia de febrero";
         }
-        
+        */
         String t="date-";
         t+=ctx.getText();
         return (T)t; //To change body of generated methods, choose Tools | Templates.

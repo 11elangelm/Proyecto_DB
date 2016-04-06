@@ -1,4 +1,5 @@
 {"cantRegistros":6,"IDs":["marca","precio","id"],"Tipos":["char(20)","float","int"],"nombre":"carro","columnas":{"marca":"char(20)","precio":"float","id":"int"}}
 {"cantRegistros":0,"IDs":["ed"],"Tipos":["int"],"nombre":"nada","columnas":{"ed":"int"}}
 {"cantRegistros":0,"IDs":["edad","nacimiento","sueldo","nombre"],"Tipos":["int","date","float","char(20)"],"nombre":"persona","columnas":{"sueldo":"float","edad":"int","nombre":"char(20)","nacimiento":"date"}}
-{"cantRegistros":1,"IDs":["nombre"],"Tipos":["int"],"nombre":"ramas","columnas":{"nombre":"int"}}
+{"cantRegistros":2,"IDs":["nombre"],"Tipos":["int"],"nombre":"ramas","columnas":{"nombre":"int"}}
+{"cantRegistros":1,"IDs":["ed"],"Tipos":["int"],"nombre":"nsa","columnas":{"ed":"int"}}

@@ -7,6 +7,8 @@ package Auxiliares;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  *
@@ -55,4 +57,20 @@ public class ContenidoTabla {
     public void addRegistro(HashMap entrada){
         this.lista.add(entrada);
     }
+
+    @Override
+    public String toString() {
+        String t="";
+        for (HashMap mapa : lista) {
+            for (Iterator it = mapa.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<String, String> entry = (Map.Entry<String, String>) it.next();
+                String key = entry.getKey();
+                String value = entry.getValue();
+                t+=("key, " + key + " value " + value)+"\n";
+            }
+        }
+        return "ContenidoTabla{" + t+'}';
+    }
+    
+    
 }

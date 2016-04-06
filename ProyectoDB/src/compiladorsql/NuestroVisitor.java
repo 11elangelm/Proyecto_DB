@@ -524,7 +524,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         String FkName = ctx.ID(0).getText();
         //source columns
         ArrayList<String> SourceColumns = new ArrayList<String>();
-        for(int i=0; i<ctx.ID().size(); i++)
+        for(int i=1; i<ctx.ID().size(); i++)
         {
             String SourceName = ctx.ID(i).getText();
             //revisar si columna existe en tabla
@@ -541,10 +541,16 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             }
             SourceColumns.add(SourceName);
         }
-        //mandar a traer las columnas de la tabla a referenciar 
-        ArrayList<String> DestinyColumns = (ArrayList<String>)visit(ctx.references());
+        //mandar a traer las columnas de la tabla a referenciar
+        String visitReferences = (String)visitReferences(ctx.references());
+        if(visitReferences.contains("error")){
+            return (T)visitReferences;
+        }
+        
+        ArrayList<String> DestinyColumns = this.destinyColumns;
         //revisar que el numero de columnas sea el mismo
-        if(SourceColumns.size() != DestinyColumns.size())
+        
+        if(SourceColumns.size() != destinyColumns.size())
         {
             this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia una cantidad de atributos erronea para la llave foranea" );
             return (T)"error al agregar foreign key sin que las columnas sean la misma cantidad";
@@ -567,9 +573,12 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         return (T)"";
     }
 
+    private ArrayList<String> destinyColumns= new ArrayList();
+    
     @Override
-    public Object visitReferences(GramaticaParser.ReferencesContext ctx) 
+    public T visitReferences(GramaticaParser.ReferencesContext ctx) 
     {
+        
         String RtableName = ctx.ID(0).getText();
         //revisar si la tabla a referenciar existe
         if(this.tablasActuales.containsKey(RtableName) == false)
@@ -578,9 +587,10 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             return (T)"error al agregar foreign key referenciando a una tabla que no existe";
         }
         this.ReferencedTable = this.tablasActuales.get(RtableName);
-        ArrayList<String> destinyColumns = new ArrayList<String>();
+        this.destinyColumns.clear();
         for(int i=1; i<ctx.ID().size(); i++)
         {
+            
             //revisar si la tabla referenciada contiene las referencias
             String DestinyName = ctx.ID(i).getText();
             if(ReferencedTable.ColumnExists(DestinyName) == false)
@@ -588,15 +598,18 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + DestinyName + " que no existe en la tabla " + ReferencedTable);
                 return (T)"error al agregar foreign key referenciando a una columna que no existe";
             }
+            
             //revisar si las columnas referenciadas son primary key
             if(ReferencedTable.PkS.PkColumns.contains(DestinyName) == false)
             {
                 this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + DestinyName + " que no es primary key en la tabla " + ReferencedTable);
                 return (T)"error al agregar foreign key referenciando a una columna que no es primary key";
             }
-            destinyColumns.add(DestinyName);
+            
+            this.destinyColumns.add(DestinyName);
+            
         }
-        return (T)destinyColumns;
+        return (T)"";
     }
     
     
@@ -651,6 +664,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitMostrarColumnasTB(GramaticaParser.MostrarColumnasTBContext ctx) 
     {
+        
         String tableName = ctx.ID().getText();
         //revisa que la tabla exista
         if(this.tablasActuales.containsKey(tableName) == false)
@@ -677,6 +691,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitMostrarTablasTB(GramaticaParser.MostrarTablasTBContext ctx) 
     {
+        if(this.bUse)
         try {
             List<Table> tablas = this.getInfoMDLocal(dirActual);
             if(tablas.isEmpty())
@@ -777,6 +792,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
      *renombra una tabla 
      *
     *******************/
+    
     @Override
     public T visitRenameTB(GramaticaParser.RenameTBContext ctx) {
         revVerb("voy a revisar si la tabla que voy a renombrar si existe");
@@ -820,6 +836,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         return (T)""; 
         
     }
+    
      /******************
      *elimina una columna para una tabla dada 
      *
@@ -847,6 +864,25 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             return (T)"error al eliminar columna que existe";
         }
         //eliminar la columna
+        
+//        REVISAR QUE NO SEA UNA FOREIGN KEY
+        
+        //ITERAR SOBRE TODAS LAS TABLAS ACTUALES
+        for (Table tablaXrev : this.tablasActuales.values()) {
+            if(!tablaXrev.getNombre().equals(tablaActualName))
+            //ITERAR SOBRE TODAS LAS FOREIGN KEYS DE LAS TABLAS
+            for (FkConstraint listaFKs : tablaXrev.FkS) {
+                //si la tabla a la que referencio es la que voy a alterar
+                if(listaFKs.references.getNombre().equals(tablaActualName)){
+                    for (String columnaDestinoFK : listaFKs.FkColumnsDestiny) {
+                        if(columnaDestinoFK.equals(columnName)){
+                            this.errores.add("La linea: " + ctx.start.getLine() + ", " + "intenta borrar la columna " + columnName + " que es foreign key de la tabla "+tablaXrev+", primero debe eliminar esta constraint" );
+                            return (T)"error al tratar de eliminar columna que existe";
+                        }
+                    }
+                }
+            }
+        }
         
         int indice = tabla.IDs.indexOf(columnName);
         tabla.IDs.remove(indice);

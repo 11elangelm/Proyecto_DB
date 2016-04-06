@@ -155,3 +155,26 @@ create table mesa (ram int,framerate float);
 alter table mesa add column marca char (22);
 insert into mesa (marca,ram) values('asus',123.32);
 show tables;
+
+
+
+
+//drop database pruebas;
+//create database pruebas;
+use database pruebas;
+drop table cliente;
+drop table recibo;
+CREATE TABLE cliente (id int CONSTRAINT pkCliente PRIMARY KEY  (id) );
+CREATE TABLE recibo (idCliente int, idProducto int, totalCompra float,id int);
+ALTER TABLE recibo ADD CONSTRAINT fkReciboClie FOREIGN KEY (idCliente) REFERENCES cliente(id);
+
+
+
+drop database pruebas;
+create database pruebas;
+use database pruebas;
+drop table cliente;
+drop table recibo;
+CREATE TABLE cliente (id int , CONSTRAINT pkCliente PRIMARY KEY  (id) );
+CREATE TABLE recibo (idCliente int, idProducto int, totalCompra float,id int);
+ALTER TABLE recibo ADD CONSTRAINT fkReciboClie FOREIGN KEY (idCliente) REFERENCES cliente(id);

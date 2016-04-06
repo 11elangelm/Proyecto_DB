@@ -23,7 +23,7 @@ public class Table {
     public ArrayList<String>Tipos = new ArrayList<String>();
     public String nombre;
     public boolean Pk = false;
-    public PkConstraint PkS;
+    public PkConstraint PkS=new PkConstraint();
     public ArrayList<FkConstraint> FkS = new ArrayList<FkConstraint>();
     public ArrayList<ChConstraint> ChK = new ArrayList<ChConstraint>();
     public HashMap<String,String> columnas = new HashMap();

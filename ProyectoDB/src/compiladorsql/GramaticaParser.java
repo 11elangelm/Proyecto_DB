@@ -1,4 +1,4 @@
-// Generated from C:\Users\juankboix1309\Documents\NetBeansProjects\Proyecto_DB\ProyectoDB\src\compiladorsql\Gramatica.g4 by ANTLR 4.2.2
+// Generated from C:\Users\u005Cuser\Desktop\proyecto_DB\Proyecto_DB\ProyectoDB\src\compiladorsql\Gramatica.g4 by ANTLR 4.4
 package compiladorsql;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -11,6 +11,8 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class GramaticaParser extends Parser {
+	static { RuntimeMetaData.checkVersion("4.4", RuntimeMetaData.VERSION); }
+
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
@@ -76,17 +78,17 @@ public class GramaticaParser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 	public static class SqlProgramContext extends ParserRuleContext {
-		public List<StatementContext> statement() {
-			return getRuleContexts(StatementContext.class);
-		}
-		public TerminalNode EOF() { return getToken(GramaticaParser.EOF, 0); }
-		public List<TerminalNode> DOTCOMMA() { return getTokens(GramaticaParser.DOTCOMMA); }
 		public TerminalNode DOTCOMMA(int i) {
 			return getToken(GramaticaParser.DOTCOMMA, i);
 		}
+		public TerminalNode EOF() { return getToken(GramaticaParser.EOF, 0); }
 		public StatementContext statement(int i) {
 			return getRuleContext(StatementContext.class,i);
 		}
+		public List<StatementContext> statement() {
+			return getRuleContexts(StatementContext.class);
+		}
+		public List<TerminalNode> DOTCOMMA() { return getTokens(GramaticaParser.DOTCOMMA); }
 		public SqlProgramContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -118,7 +120,7 @@ public class GramaticaParser extends Parser {
 			setState(95);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,0,_ctx);
-			while ( _alt!=2 && _alt!=ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{
@@ -154,11 +156,11 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class StatementContext extends ParserRuleContext {
-		public TOperationContext tOperation() {
-			return getRuleContext(TOperationContext.class,0);
-		}
 		public DOperationContext dOperation() {
 			return getRuleContext(DOperationContext.class,0);
+		}
+		public TOperationContext tOperation() {
+			return getRuleContext(TOperationContext.class,0);
 		}
 		public DbOperationContext dbOperation() {
 			return getRuleContext(DbOperationContext.class,0);
@@ -194,14 +196,12 @@ public class GramaticaParser extends Parser {
 				setState(103); dbOperation();
 				}
 				break;
-
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(104); tOperation();
 				}
 				break;
-
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
@@ -232,34 +232,10 @@ public class GramaticaParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class AlterarDBContext extends DbOperationContext {
-		public TerminalNode DATABASE() { return getToken(GramaticaParser.DATABASE, 0); }
-		public TerminalNode ALTER() { return getToken(GramaticaParser.ALTER, 0); }
-		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
-		public TerminalNode RENAME() { return getToken(GramaticaParser.RENAME, 0); }
-		public TerminalNode TO() { return getToken(GramaticaParser.TO, 0); }
-		public TerminalNode ID(int i) {
-			return getToken(GramaticaParser.ID, i);
-		}
-		public AlterarDBContext(DbOperationContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterAlterarDB(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitAlterarDB(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitAlterarDB(this);
-			else return visitor.visitChildren(this);
-		}
-	}
 	public static class UsarDBContext extends DbOperationContext {
+		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
 		public TerminalNode DATABASE() { return getToken(GramaticaParser.DATABASE, 0); }
 		public TerminalNode USE() { return getToken(GramaticaParser.USE, 0); }
-		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
 		public UsarDBContext(DbOperationContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -275,28 +251,9 @@ public class GramaticaParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class CrearDBContext extends DbOperationContext {
-		public TerminalNode DATABASE() { return getToken(GramaticaParser.DATABASE, 0); }
-		public TerminalNode CREATE() { return getToken(GramaticaParser.CREATE, 0); }
-		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
-		public CrearDBContext(DbOperationContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterCrearDB(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitCrearDB(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitCrearDB(this);
-			else return visitor.visitChildren(this);
-		}
-	}
 	public static class MostrarDBContext extends DbOperationContext {
-		public TerminalNode DATABASES() { return getToken(GramaticaParser.DATABASES, 0); }
 		public TerminalNode SHOW() { return getToken(GramaticaParser.SHOW, 0); }
+		public TerminalNode DATABASES() { return getToken(GramaticaParser.DATABASES, 0); }
 		public MostrarDBContext(DbOperationContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -312,9 +269,52 @@ public class GramaticaParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class EliminarDBContext extends DbOperationContext {
+	public static class AlterarDBContext extends DbOperationContext {
+		public TerminalNode RENAME() { return getToken(GramaticaParser.RENAME, 0); }
+		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
 		public TerminalNode DATABASE() { return getToken(GramaticaParser.DATABASE, 0); }
+		public TerminalNode ID(int i) {
+			return getToken(GramaticaParser.ID, i);
+		}
+		public TerminalNode TO() { return getToken(GramaticaParser.TO, 0); }
+		public TerminalNode ALTER() { return getToken(GramaticaParser.ALTER, 0); }
+		public AlterarDBContext(DbOperationContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterAlterarDB(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitAlterarDB(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitAlterarDB(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class CrearDBContext extends DbOperationContext {
 		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
+		public TerminalNode DATABASE() { return getToken(GramaticaParser.DATABASE, 0); }
+		public TerminalNode CREATE() { return getToken(GramaticaParser.CREATE, 0); }
+		public CrearDBContext(DbOperationContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterCrearDB(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitCrearDB(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitCrearDB(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class EliminarDBContext extends DbOperationContext {
+		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
+		public TerminalNode DATABASE() { return getToken(GramaticaParser.DATABASE, 0); }
 		public TerminalNode DROP() { return getToken(GramaticaParser.DROP, 0); }
 		public EliminarDBContext(DbOperationContext ctx) { copyFrom(ctx); }
 		@Override
@@ -401,17 +401,17 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class DOperationContext extends ParserRuleContext {
-		public UpdateContext update() {
-			return getRuleContext(UpdateContext.class,0);
+		public InsertContext insert() {
+			return getRuleContext(InsertContext.class,0);
 		}
 		public QueryContext query() {
 			return getRuleContext(QueryContext.class,0);
 		}
+		public UpdateContext update() {
+			return getRuleContext(UpdateContext.class,0);
+		}
 		public DeleteContext delete() {
 			return getRuleContext(DeleteContext.class,0);
-		}
-		public InsertContext insert() {
-			return getRuleContext(InsertContext.class,0);
 		}
 		public DOperationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -488,96 +488,34 @@ public class GramaticaParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class MostrarColumnasTBContext extends TOperationContext {
-		public TerminalNode COLUMNS() { return getToken(GramaticaParser.COLUMNS, 0); }
-		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
+	public static class MostrarTablasTBContext extends TOperationContext {
 		public TerminalNode SHOW() { return getToken(GramaticaParser.SHOW, 0); }
-		public TerminalNode FROM() { return getToken(GramaticaParser.FROM, 0); }
-		public MostrarColumnasTBContext(TOperationContext ctx) { copyFrom(ctx); }
+		public TerminalNode TABLES() { return getToken(GramaticaParser.TABLES, 0); }
+		public MostrarTablasTBContext(TOperationContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterMostrarColumnasTB(this);
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterMostrarTablasTB(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitMostrarColumnasTB(this);
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitMostrarTablasTB(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitMostrarColumnasTB(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class CrearTBContext extends TOperationContext {
-		public TerminalNode CREATE() { return getToken(GramaticaParser.CREATE, 0); }
-		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
-		public ColumnaContext columna(int i) {
-			return getRuleContext(ColumnaContext.class,i);
-		}
-		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
-		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
-		public TerminalNode CONSTRAINT(int i) {
-			return getToken(GramaticaParser.CONSTRAINT, i);
-		}
-		public TerminalNode COMMA(int i) {
-			return getToken(GramaticaParser.COMMA, i);
-		}
-		public ConstraintContext constraint(int i) {
-			return getRuleContext(ConstraintContext.class,i);
-		}
-		public List<ConstraintContext> constraint() {
-			return getRuleContexts(ConstraintContext.class);
-		}
-		public List<ColumnaContext> columna() {
-			return getRuleContexts(ColumnaContext.class);
-		}
-		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
-		public TerminalNode TABLE() { return getToken(GramaticaParser.TABLE, 0); }
-		public List<TerminalNode> CONSTRAINT() { return getTokens(GramaticaParser.CONSTRAINT); }
-		public CrearTBContext(TOperationContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterCrearTB(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitCrearTB(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitCrearTB(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class EliminarTBContext extends TOperationContext {
-		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
-		public TerminalNode TABLE() { return getToken(GramaticaParser.TABLE, 0); }
-		public TerminalNode DROP() { return getToken(GramaticaParser.DROP, 0); }
-		public EliminarTBContext(TOperationContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterEliminarTB(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitEliminarTB(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitEliminarTB(this);
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitMostrarTablasTB(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 	public static class AlterarTBContext extends TOperationContext {
+		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
 		public List<TableActionContext> tableAction() {
 			return getRuleContexts(TableActionContext.class);
 		}
+		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
+		public TerminalNode ALTER() { return getToken(GramaticaParser.ALTER, 0); }
 		public TableActionContext tableAction(int i) {
 			return getRuleContext(TableActionContext.class,i);
 		}
-		public TerminalNode ALTER() { return getToken(GramaticaParser.ALTER, 0); }
-		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
-		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
 		public TerminalNode TABLE() { return getToken(GramaticaParser.TABLE, 0); }
 		public TerminalNode COMMA(int i) {
 			return getToken(GramaticaParser.COMMA, i);
@@ -597,21 +535,83 @@ public class GramaticaParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MostrarTablasTBContext extends TOperationContext {
-		public TerminalNode TABLES() { return getToken(GramaticaParser.TABLES, 0); }
-		public TerminalNode SHOW() { return getToken(GramaticaParser.SHOW, 0); }
-		public MostrarTablasTBContext(TOperationContext ctx) { copyFrom(ctx); }
+	public static class CrearTBContext extends TOperationContext {
+		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
+		public TerminalNode CONSTRAINT(int i) {
+			return getToken(GramaticaParser.CONSTRAINT, i);
+		}
+		public ColumnaContext columna(int i) {
+			return getRuleContext(ColumnaContext.class,i);
+		}
+		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
+		public TerminalNode TABLE() { return getToken(GramaticaParser.TABLE, 0); }
+		public TerminalNode COMMA(int i) {
+			return getToken(GramaticaParser.COMMA, i);
+		}
+		public ConstraintContext constraint(int i) {
+			return getRuleContext(ConstraintContext.class,i);
+		}
+		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
+		public List<ColumnaContext> columna() {
+			return getRuleContexts(ColumnaContext.class);
+		}
+		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
+		public List<ConstraintContext> constraint() {
+			return getRuleContexts(ConstraintContext.class);
+		}
+		public List<TerminalNode> CONSTRAINT() { return getTokens(GramaticaParser.CONSTRAINT); }
+		public TerminalNode CREATE() { return getToken(GramaticaParser.CREATE, 0); }
+		public CrearTBContext(TOperationContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterMostrarTablasTB(this);
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterCrearTB(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitMostrarTablasTB(this);
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitCrearTB(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitMostrarTablasTB(this);
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitCrearTB(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class EliminarTBContext extends TOperationContext {
+		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
+		public TerminalNode DROP() { return getToken(GramaticaParser.DROP, 0); }
+		public TerminalNode TABLE() { return getToken(GramaticaParser.TABLE, 0); }
+		public EliminarTBContext(TOperationContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterEliminarTB(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitEliminarTB(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitEliminarTB(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class MostrarColumnasTBContext extends TOperationContext {
+		public TerminalNode SHOW() { return getToken(GramaticaParser.SHOW, 0); }
+		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
+		public TerminalNode COLUMNS() { return getToken(GramaticaParser.COLUMNS, 0); }
+		public TerminalNode FROM() { return getToken(GramaticaParser.FROM, 0); }
+		public MostrarColumnasTBContext(TOperationContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterMostrarColumnasTB(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitMostrarColumnasTB(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitMostrarColumnasTB(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -636,7 +636,7 @@ public class GramaticaParser extends Parser {
 				setState(142);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
-				while ( _alt!=2 && _alt!=ATN.INVALID_ALT_NUMBER ) {
+				while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 					if ( _alt==1 ) {
 						{
 						{
@@ -649,11 +649,11 @@ public class GramaticaParser extends Parser {
 					_errHandler.sync(this);
 					_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
 				}
-				setState(145); match(COMMA);
 				setState(156);
 				_la = _input.LA(1);
-				if (_la==CONSTRAINT) {
+				if (_la==COMMA) {
 					{
+					setState(145); match(COMMA);
 					setState(146); match(CONSTRAINT);
 					setState(147); constraint();
 					setState(153);
@@ -677,7 +677,6 @@ public class GramaticaParser extends Parser {
 				setState(158); match(RPARENT);
 				}
 				break;
-
 			case 2:
 				_localctx = new AlterarTBContext(_localctx);
 				enterOuterAlt(_localctx, 2);
@@ -714,7 +713,6 @@ public class GramaticaParser extends Parser {
 				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << DROP) | (1L << RENAME) | (1L << ADD))) != 0) );
 				}
 				break;
-
 			case 3:
 				_localctx = new EliminarTBContext(_localctx);
 				enterOuterAlt(_localctx, 3);
@@ -724,7 +722,6 @@ public class GramaticaParser extends Parser {
 				setState(177); match(ID);
 				}
 				break;
-
 			case 4:
 				_localctx = new MostrarTablasTBContext(_localctx);
 				enterOuterAlt(_localctx, 4);
@@ -733,7 +730,6 @@ public class GramaticaParser extends Parser {
 				setState(179); match(TABLES);
 				}
 				break;
-
 			case 5:
 				_localctx = new MostrarColumnasTBContext(_localctx);
 				enterOuterAlt(_localctx, 5);
@@ -813,9 +809,65 @@ public class GramaticaParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class DropColumnTBContext extends TableActionContext {
+	public static class AddColumnTBContext extends TableActionContext {
+		public TerminalNode CONSTRAINT(int i) {
+			return getToken(GramaticaParser.CONSTRAINT, i);
+		}
 		public TerminalNode COLUMN() { return getToken(GramaticaParser.COLUMN, 0); }
+		public ColumnaContext columna() {
+			return getRuleContext(ColumnaContext.class,0);
+		}
+		public List<ConstraintContext> constraint() {
+			return getRuleContexts(ConstraintContext.class);
+		}
+		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
+		public TerminalNode ADD() { return getToken(GramaticaParser.ADD, 0); }
+		public List<TerminalNode> CONSTRAINT() { return getTokens(GramaticaParser.CONSTRAINT); }
+		public TerminalNode COMMA(int i) {
+			return getToken(GramaticaParser.COMMA, i);
+		}
+		public ConstraintContext constraint(int i) {
+			return getRuleContext(ConstraintContext.class,i);
+		}
+		public AddColumnTBContext(TableActionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterAddColumnTB(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitAddColumnTB(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitAddColumnTB(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class AddConstraintTBContext extends TableActionContext {
+		public ConstraintContext constraint() {
+			return getRuleContext(ConstraintContext.class,0);
+		}
+		public TerminalNode ADD() { return getToken(GramaticaParser.ADD, 0); }
+		public TerminalNode CONSTRAINT() { return getToken(GramaticaParser.CONSTRAINT, 0); }
+		public AddConstraintTBContext(TableActionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterAddConstraintTB(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitAddConstraintTB(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitAddConstraintTB(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class DropColumnTBContext extends TableActionContext {
 		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
+		public TerminalNode COLUMN() { return getToken(GramaticaParser.COLUMN, 0); }
 		public TerminalNode DROP() { return getToken(GramaticaParser.DROP, 0); }
 		public DropColumnTBContext(TableActionContext ctx) { copyFrom(ctx); }
 		@Override
@@ -833,8 +885,8 @@ public class GramaticaParser extends Parser {
 		}
 	}
 	public static class RenameTBContext extends TableActionContext {
-		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
 		public TerminalNode RENAME() { return getToken(GramaticaParser.RENAME, 0); }
+		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
 		public TerminalNode TO() { return getToken(GramaticaParser.TO, 0); }
 		public RenameTBContext(TableActionContext ctx) { copyFrom(ctx); }
 		@Override
@@ -851,45 +903,10 @@ public class GramaticaParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class AddColumnTBContext extends TableActionContext {
-		public ConstraintContext constraint(int i) {
-			return getRuleContext(ConstraintContext.class,i);
-		}
-		public List<ConstraintContext> constraint() {
-			return getRuleContexts(ConstraintContext.class);
-		}
-		public TerminalNode COLUMN() { return getToken(GramaticaParser.COLUMN, 0); }
-		public ColumnaContext columna() {
-			return getRuleContext(ColumnaContext.class,0);
-		}
-		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
-		public List<TerminalNode> CONSTRAINT() { return getTokens(GramaticaParser.CONSTRAINT); }
-		public TerminalNode CONSTRAINT(int i) {
-			return getToken(GramaticaParser.CONSTRAINT, i);
-		}
-		public TerminalNode COMMA(int i) {
-			return getToken(GramaticaParser.COMMA, i);
-		}
-		public TerminalNode ADD() { return getToken(GramaticaParser.ADD, 0); }
-		public AddColumnTBContext(TableActionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterAddColumnTB(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitAddColumnTB(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitAddColumnTB(this);
-			else return visitor.visitChildren(this);
-		}
-	}
 	public static class DropConstraintTBContext extends TableActionContext {
 		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
-		public TerminalNode CONSTRAINT() { return getToken(GramaticaParser.CONSTRAINT, 0); }
 		public TerminalNode DROP() { return getToken(GramaticaParser.DROP, 0); }
+		public TerminalNode CONSTRAINT() { return getToken(GramaticaParser.CONSTRAINT, 0); }
 		public DropConstraintTBContext(TableActionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -902,27 +919,6 @@ public class GramaticaParser extends Parser {
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitDropConstraintTB(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class AddConstraintTBContext extends TableActionContext {
-		public ConstraintContext constraint() {
-			return getRuleContext(ConstraintContext.class,0);
-		}
-		public TerminalNode CONSTRAINT() { return getToken(GramaticaParser.CONSTRAINT, 0); }
-		public TerminalNode ADD() { return getToken(GramaticaParser.ADD, 0); }
-		public AddConstraintTBContext(TableActionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterAddConstraintTB(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitAddConstraintTB(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitAddConstraintTB(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -955,7 +951,7 @@ public class GramaticaParser extends Parser {
 						setState(199);
 						_errHandler.sync(this);
 						_alt = getInterpreter().adaptivePredict(_input,11,_ctx);
-						while ( _alt!=2 && _alt!=ATN.INVALID_ALT_NUMBER ) {
+						while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 							if ( _alt==1 ) {
 								{
 								{
@@ -974,7 +970,6 @@ public class GramaticaParser extends Parser {
 
 					}
 					break;
-
 				case 2:
 					{
 					}
@@ -982,7 +977,6 @@ public class GramaticaParser extends Parser {
 				}
 				}
 				break;
-
 			case 2:
 				_localctx = new AddConstraintTBContext(_localctx);
 				enterOuterAlt(_localctx, 2);
@@ -992,7 +986,6 @@ public class GramaticaParser extends Parser {
 				setState(209); constraint();
 				}
 				break;
-
 			case 3:
 				_localctx = new DropColumnTBContext(_localctx);
 				enterOuterAlt(_localctx, 3);
@@ -1002,7 +995,6 @@ public class GramaticaParser extends Parser {
 				setState(212); match(ID);
 				}
 				break;
-
 			case 4:
 				_localctx = new DropConstraintTBContext(_localctx);
 				enterOuterAlt(_localctx, 4);
@@ -1012,7 +1004,6 @@ public class GramaticaParser extends Parser {
 				setState(215); match(ID);
 				}
 				break;
-
 			case 5:
 				_localctx = new RenameTBContext(_localctx);
 				enterOuterAlt(_localctx, 5);
@@ -1063,26 +1054,6 @@ public class GramaticaParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TipoCharContext extends TypeContext {
-		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
-		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
-		public TerminalNode CHAR() { return getToken(GramaticaParser.CHAR, 0); }
-		public TerminalNode NUM() { return getToken(GramaticaParser.NUM, 0); }
-		public TipoCharContext(TypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterTipoChar(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitTipoChar(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitTipoChar(this);
-			else return visitor.visitChildren(this);
-		}
-	}
 	public static class TipoFloatContext extends TypeContext {
 		public TerminalNode FLOAT() { return getToken(GramaticaParser.FLOAT, 0); }
 		public TipoFloatContext(TypeContext ctx) { copyFrom(ctx); }
@@ -1114,6 +1085,26 @@ public class GramaticaParser extends Parser {
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitTipoEntero(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class TipoCharContext extends TypeContext {
+		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
+		public TerminalNode NUM() { return getToken(GramaticaParser.NUM, 0); }
+		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
+		public TerminalNode CHAR() { return getToken(GramaticaParser.CHAR, 0); }
+		public TipoCharContext(TypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterTipoChar(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitTipoChar(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitTipoChar(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1181,43 +1172,40 @@ public class GramaticaParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class ConstraintFKContext extends ConstraintContext {
-		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
-		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
+	public static class ConstraintPKContext extends ConstraintContext {
+		public TerminalNode PRIMARY() { return getToken(GramaticaParser.PRIMARY, 0); }
+		public TerminalNode KEY() { return getToken(GramaticaParser.KEY, 0); }
 		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
 		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
-		public TerminalNode KEY() { return getToken(GramaticaParser.KEY, 0); }
-		public ReferencesContext references() {
-			return getRuleContext(ReferencesContext.class,0);
+		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
+		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
+		public TerminalNode ID(int i) {
+			return getToken(GramaticaParser.ID, i);
 		}
 		public TerminalNode COMMA(int i) {
 			return getToken(GramaticaParser.COMMA, i);
 		}
-		public TerminalNode FOREIGN() { return getToken(GramaticaParser.FOREIGN, 0); }
-		public TerminalNode ID(int i) {
-			return getToken(GramaticaParser.ID, i);
-		}
-		public ConstraintFKContext(ConstraintContext ctx) { copyFrom(ctx); }
+		public ConstraintPKContext(ConstraintContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterConstraintFK(this);
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterConstraintPK(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitConstraintFK(this);
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitConstraintPK(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitConstraintFK(this);
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitConstraintPK(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 	public static class ConstraintCheckContext extends ConstraintContext {
 		public TerminalNode CHECK() { return getToken(GramaticaParser.CHECK, 0); }
+		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
 		public Exp1Context exp1() {
 			return getRuleContext(Exp1Context.class,0);
 		}
-		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
 		public ConstraintCheckContext(ConstraintContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -1233,31 +1221,34 @@ public class GramaticaParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class ConstraintPKContext extends ConstraintContext {
-		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
-		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
+	public static class ConstraintFKContext extends ConstraintContext {
+		public TerminalNode KEY() { return getToken(GramaticaParser.KEY, 0); }
 		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
 		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
-		public TerminalNode KEY() { return getToken(GramaticaParser.KEY, 0); }
-		public TerminalNode PRIMARY() { return getToken(GramaticaParser.PRIMARY, 0); }
-		public TerminalNode COMMA(int i) {
-			return getToken(GramaticaParser.COMMA, i);
+		public ReferencesContext references() {
+			return getRuleContext(ReferencesContext.class,0);
 		}
+		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
+		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
 		public TerminalNode ID(int i) {
 			return getToken(GramaticaParser.ID, i);
 		}
-		public ConstraintPKContext(ConstraintContext ctx) { copyFrom(ctx); }
+		public TerminalNode FOREIGN() { return getToken(GramaticaParser.FOREIGN, 0); }
+		public TerminalNode COMMA(int i) {
+			return getToken(GramaticaParser.COMMA, i);
+		}
+		public ConstraintFKContext(ConstraintContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterConstraintPK(this);
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).enterConstraintFK(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitConstraintPK(this);
+			if ( listener instanceof GramaticaListener ) ((GramaticaListener)listener).exitConstraintFK(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitConstraintPK(this);
+			if ( visitor instanceof GramaticaVisitor ) return ((GramaticaVisitor<? extends T>)visitor).visitConstraintFK(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1307,7 +1298,6 @@ public class GramaticaParser extends Parser {
 				setState(247); match(RPARENT);
 				}
 				break;
-
 			case 2:
 				_localctx = new ConstraintFKContext(_localctx);
 				enterOuterAlt(_localctx, 2);
@@ -1347,7 +1337,6 @@ public class GramaticaParser extends Parser {
 				setState(266); references();
 				}
 				break;
-
 			case 3:
 				_localctx = new ConstraintCheckContext(_localctx);
 				enterOuterAlt(_localctx, 3);
@@ -1373,17 +1362,17 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class ReferencesContext extends ParserRuleContext {
-		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
-		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
 		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
 		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
-		public TerminalNode COMMA(int i) {
-			return getToken(GramaticaParser.COMMA, i);
-		}
+		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
+		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
+		public TerminalNode REFERENCES() { return getToken(GramaticaParser.REFERENCES, 0); }
 		public TerminalNode ID(int i) {
 			return getToken(GramaticaParser.ID, i);
 		}
-		public TerminalNode REFERENCES() { return getToken(GramaticaParser.REFERENCES, 0); }
+		public TerminalNode COMMA(int i) {
+			return getToken(GramaticaParser.COMMA, i);
+		}
 		public ReferencesContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1505,11 +1494,11 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class Exp2Context extends ParserRuleContext {
-		public Exp3Context exp3() {
-			return getRuleContext(Exp3Context.class,0);
-		}
 		public Exp2Context exp2() {
 			return getRuleContext(Exp2Context.class,0);
+		}
+		public Exp3Context exp3() {
+			return getRuleContext(Exp3Context.class,0);
 		}
 		public AndExpContext andExp() {
 			return getRuleContext(AndExpContext.class,0);
@@ -1555,7 +1544,7 @@ public class GramaticaParser extends Parser {
 			setState(302);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,24,_ctx);
-			while ( _alt!=2 && _alt!=ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
@@ -1588,11 +1577,11 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class Exp3Context extends ParserRuleContext {
-		public Exp3Context exp3() {
-			return getRuleContext(Exp3Context.class,0);
-		}
 		public Exp4Context exp4() {
 			return getRuleContext(Exp4Context.class,0);
+		}
+		public Exp3Context exp3() {
+			return getRuleContext(Exp3Context.class,0);
 		}
 		public OrExpContext orExp() {
 			return getRuleContext(OrExpContext.class,0);
@@ -1638,7 +1627,7 @@ public class GramaticaParser extends Parser {
 			setState(314);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,25,_ctx);
-			while ( _alt!=2 && _alt!=ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
@@ -1671,14 +1660,14 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class Exp4Context extends ParserRuleContext {
+		public Exp4Context exp4() {
+			return getRuleContext(Exp4Context.class,0);
+		}
 		public EqExpContext eqExp() {
 			return getRuleContext(EqExpContext.class,0);
 		}
 		public Exp5Context exp5() {
 			return getRuleContext(Exp5Context.class,0);
-		}
-		public Exp4Context exp4() {
-			return getRuleContext(Exp4Context.class,0);
 		}
 		public Exp4Context(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1721,7 +1710,7 @@ public class GramaticaParser extends Parser {
 			setState(326);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,26,_ctx);
-			while ( _alt!=2 && _alt!=ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
@@ -1804,7 +1793,7 @@ public class GramaticaParser extends Parser {
 			setState(338);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,27,_ctx);
-			while ( _alt!=2 && _alt!=ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
@@ -1901,18 +1890,18 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class FactorContext extends ParserRuleContext {
-		public TerminalNode DOT() { return getToken(GramaticaParser.DOT, 0); }
-		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
-		public Exp1Context exp1() {
-			return getRuleContext(Exp1Context.class,0);
-		}
 		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
+		public TerminalNode DOT() { return getToken(GramaticaParser.DOT, 0); }
 		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
 		public LiteralContext literal() {
 			return getRuleContext(LiteralContext.class,0);
 		}
+		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
 		public TerminalNode ID(int i) {
 			return getToken(GramaticaParser.ID, i);
+		}
+		public Exp1Context exp1() {
+			return getRuleContext(Exp1Context.class,0);
 		}
 		public FactorContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2031,14 +2020,14 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class ExpContext extends ParserRuleContext {
-		public NotExpContext notExp() {
-			return getRuleContext(NotExpContext.class,0);
-		}
 		public OrExpContext orExp() {
 			return getRuleContext(OrExpContext.class,0);
 		}
 		public AndExpContext andExp() {
 			return getRuleContext(AndExpContext.class,0);
+		}
+		public NotExpContext notExp() {
+			return getRuleContext(NotExpContext.class,0);
 		}
 		public ExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2222,8 +2211,8 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class EqExpContext extends ParserRuleContext {
-		public TerminalNode NOTEQ() { return getToken(GramaticaParser.NOTEQ, 0); }
 		public TerminalNode EQ() { return getToken(GramaticaParser.EQ, 0); }
+		public TerminalNode NOTEQ() { return getToken(GramaticaParser.NOTEQ, 0); }
 		public EqExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2272,8 +2261,8 @@ public class GramaticaParser extends Parser {
 	public static class GlExpContext extends ParserRuleContext {
 		public TerminalNode EQGTHAN() { return getToken(GramaticaParser.EQGTHAN, 0); }
 		public TerminalNode LTHAN() { return getToken(GramaticaParser.LTHAN, 0); }
-		public TerminalNode GTHAN() { return getToken(GramaticaParser.GTHAN, 0); }
 		public TerminalNode EQLTHAN() { return getToken(GramaticaParser.EQLTHAN, 0); }
+		public TerminalNode GTHAN() { return getToken(GramaticaParser.GTHAN, 0); }
 		public GlExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2383,16 +2372,16 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class InsertContext extends ParserRuleContext {
-		public InsertValuesContext insertValues() {
-			return getRuleContext(InsertValuesContext.class,0);
-		}
 		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
-		public TerminalNode INTO() { return getToken(GramaticaParser.INTO, 0); }
-		public TerminalNode INSERT() { return getToken(GramaticaParser.INSERT, 0); }
 		public InsertColumnsContext insertColumns() {
 			return getRuleContext(InsertColumnsContext.class,0);
 		}
 		public TerminalNode VALUES() { return getToken(GramaticaParser.VALUES, 0); }
+		public InsertValuesContext insertValues() {
+			return getRuleContext(InsertValuesContext.class,0);
+		}
+		public TerminalNode INSERT() { return getToken(GramaticaParser.INSERT, 0); }
+		public TerminalNode INTO() { return getToken(GramaticaParser.INTO, 0); }
 		public InsertContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2438,15 +2427,15 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class InsertValuesContext extends ParserRuleContext {
-		public ValueContext value(int i) {
-			return getRuleContext(ValueContext.class,i);
-		}
+		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
 		public List<ValueContext> value() {
 			return getRuleContexts(ValueContext.class);
 		}
-		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
+		public ValueContext value(int i) {
+			return getRuleContext(ValueContext.class,i);
+		}
 		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
-		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
+		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
 		public TerminalNode COMMA(int i) {
 			return getToken(GramaticaParser.COMMA, i);
 		}
@@ -2519,15 +2508,15 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class InsertColumnsContext extends ParserRuleContext {
-		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
-		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
 		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
 		public TerminalNode LPARENT() { return getToken(GramaticaParser.LPARENT, 0); }
-		public TerminalNode COMMA(int i) {
-			return getToken(GramaticaParser.COMMA, i);
-		}
+		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
+		public TerminalNode RPARENT() { return getToken(GramaticaParser.RPARENT, 0); }
 		public TerminalNode ID(int i) {
 			return getToken(GramaticaParser.ID, i);
+		}
+		public TerminalNode COMMA(int i) {
+			return getToken(GramaticaParser.COMMA, i);
 		}
 		public InsertColumnsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2605,20 +2594,20 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class ValueContext extends ParserRuleContext {
-		public EnteroContext entero() {
-			return getRuleContext(EnteroContext.class,0);
-		}
 		public NulloContext nullo() {
 			return getRuleContext(NulloContext.class,0);
+		}
+		public FechaContext fecha() {
+			return getRuleContext(FechaContext.class,0);
 		}
 		public DecimalContext decimal() {
 			return getRuleContext(DecimalContext.class,0);
 		}
+		public EnteroContext entero() {
+			return getRuleContext(EnteroContext.class,0);
+		}
 		public CharacterContext character() {
 			return getRuleContext(CharacterContext.class,0);
-		}
-		public FechaContext fecha() {
-			return getRuleContext(FechaContext.class,0);
 		}
 		public ValueContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2651,28 +2640,24 @@ public class GramaticaParser extends Parser {
 				setState(419); entero();
 				}
 				break;
-
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(420); decimal();
 				}
 				break;
-
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(421); fecha();
 				}
 				break;
-
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
 				setState(422); character();
 				}
 				break;
-
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
@@ -2734,8 +2719,8 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class EnteroContext extends ParserRuleContext {
-		public TerminalNode MINUS() { return getToken(GramaticaParser.MINUS, 0); }
 		public TerminalNode NUM() { return getToken(GramaticaParser.NUM, 0); }
+		public TerminalNode MINUS() { return getToken(GramaticaParser.MINUS, 0); }
 		public EnteroContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2785,11 +2770,11 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class DecimalContext extends ParserRuleContext {
+		public TerminalNode DOT() { return getToken(GramaticaParser.DOT, 0); }
+		public TerminalNode NUM() { return getToken(GramaticaParser.NUM, 0); }
 		public EnteroContext entero() {
 			return getRuleContext(EnteroContext.class,0);
 		}
-		public TerminalNode DOT() { return getToken(GramaticaParser.DOT, 0); }
-		public TerminalNode NUM() { return getToken(GramaticaParser.NUM, 0); }
 		public DecimalContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -3037,22 +3022,22 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class UpdateContext extends ParserRuleContext {
-		public TerminalNode WHERE() { return getToken(GramaticaParser.WHERE, 0); }
-		public TerminalNode SET() { return getToken(GramaticaParser.SET, 0); }
-		public AsignacionContext asignacion(int i) {
-			return getRuleContext(AsignacionContext.class,i);
-		}
-		public Exp1Context exp1() {
-			return getRuleContext(Exp1Context.class,0);
-		}
+		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
+		public TerminalNode UPDATE() { return getToken(GramaticaParser.UPDATE, 0); }
+		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
 		public List<AsignacionContext> asignacion() {
 			return getRuleContexts(AsignacionContext.class);
 		}
-		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
-		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
-		public TerminalNode UPDATE() { return getToken(GramaticaParser.UPDATE, 0); }
+		public TerminalNode WHERE() { return getToken(GramaticaParser.WHERE, 0); }
+		public Exp1Context exp1() {
+			return getRuleContext(Exp1Context.class,0);
+		}
+		public TerminalNode SET() { return getToken(GramaticaParser.SET, 0); }
 		public TerminalNode COMMA(int i) {
 			return getToken(GramaticaParser.COMMA, i);
+		}
+		public AsignacionContext asignacion(int i) {
+			return getRuleContext(AsignacionContext.class,i);
 		}
 		public UpdateContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -3168,23 +3153,23 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class CondContext extends ParserRuleContext {
-		public ExpressionContext expression(int i) {
-			return getRuleContext(ExpressionContext.class,i);
+		public ExpContext exp() {
+			return getRuleContext(ExpContext.class,0);
 		}
 		public ValueContext value() {
 			return getRuleContext(ValueContext.class,0);
 		}
-		public ExpContext exp() {
-			return getRuleContext(ExpContext.class,0);
-		}
 		public RelExpContext relExp() {
 			return getRuleContext(RelExpContext.class,0);
 		}
-		public List<ExpressionContext> expression() {
-			return getRuleContexts(ExpressionContext.class);
+		public ExpressionContext expression(int i) {
+			return getRuleContext(ExpressionContext.class,i);
 		}
 		public CondContext cond() {
 			return getRuleContext(CondContext.class,0);
+		}
+		public List<ExpressionContext> expression() {
+			return getRuleContexts(ExpressionContext.class);
 		}
 		public CondContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -3257,13 +3242,13 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class DeleteContext extends ParserRuleContext {
+		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
+		public TerminalNode DELETE() { return getToken(GramaticaParser.DELETE, 0); }
 		public TerminalNode WHERE() { return getToken(GramaticaParser.WHERE, 0); }
+		public TerminalNode FROM() { return getToken(GramaticaParser.FROM, 0); }
 		public Exp1Context exp1() {
 			return getRuleContext(Exp1Context.class,0);
 		}
-		public TerminalNode ID() { return getToken(GramaticaParser.ID, 0); }
-		public TerminalNode DELETE() { return getToken(GramaticaParser.DELETE, 0); }
-		public TerminalNode FROM() { return getToken(GramaticaParser.FROM, 0); }
 		public DeleteContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -3316,34 +3301,34 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class QueryContext extends ParserRuleContext {
-		public List<OrderByContext> orderBy() {
-			return getRuleContexts(OrderByContext.class);
+		public List<ColumnContext> column() {
+			return getRuleContexts(ColumnContext.class);
 		}
-		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
-		public ColumnContext column(int i) {
-			return getRuleContext(ColumnContext.class,i);
+		public TerminalNode FROM() { return getToken(GramaticaParser.FROM, 0); }
+		public TerminalNode ID(int i) {
+			return getToken(GramaticaParser.ID, i);
 		}
-		public TerminalNode SELECT() { return getToken(GramaticaParser.SELECT, 0); }
 		public OrderByContext orderBy(int i) {
 			return getRuleContext(OrderByContext.class,i);
 		}
 		public TerminalNode COMMA(int i) {
 			return getToken(GramaticaParser.COMMA, i);
 		}
-		public List<ColumnContext> column() {
-			return getRuleContexts(ColumnContext.class);
-		}
-		public TerminalNode WHERE() { return getToken(GramaticaParser.WHERE, 0); }
 		public TerminalNode ASTERISK() { return getToken(GramaticaParser.ASTERISK, 0); }
+		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
+		public List<OrderByContext> orderBy() {
+			return getRuleContexts(OrderByContext.class);
+		}
+		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
+		public TerminalNode ORDER() { return getToken(GramaticaParser.ORDER, 0); }
+		public TerminalNode WHERE() { return getToken(GramaticaParser.WHERE, 0); }
+		public TerminalNode SELECT() { return getToken(GramaticaParser.SELECT, 0); }
 		public Exp1Context exp1() {
 			return getRuleContext(Exp1Context.class,0);
 		}
-		public TerminalNode ORDER() { return getToken(GramaticaParser.ORDER, 0); }
 		public TerminalNode BY() { return getToken(GramaticaParser.BY, 0); }
-		public List<TerminalNode> COMMA() { return getTokens(GramaticaParser.COMMA); }
-		public TerminalNode FROM() { return getToken(GramaticaParser.FROM, 0); }
-		public TerminalNode ID(int i) {
-			return getToken(GramaticaParser.ID, i);
+		public ColumnContext column(int i) {
+			return getRuleContext(ColumnContext.class,i);
 		}
 		public QueryContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -3464,8 +3449,8 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class ColumnContext extends ParserRuleContext {
-		public TerminalNode DOT() { return getToken(GramaticaParser.DOT, 0); }
 		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
+		public TerminalNode DOT() { return getToken(GramaticaParser.DOT, 0); }
 		public TerminalNode ID(int i) {
 			return getToken(GramaticaParser.ID, i);
 		}
@@ -3519,8 +3504,8 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class OrderByContext extends ParserRuleContext {
-		public TerminalNode DESC() { return getToken(GramaticaParser.DESC, 0); }
 		public TerminalNode ASC() { return getToken(GramaticaParser.ASC, 0); }
+		public TerminalNode DESC() { return getToken(GramaticaParser.DESC, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -3578,8 +3563,8 @@ public class GramaticaParser extends Parser {
 	}
 
 	public static class ExpressionContext extends ParserRuleContext {
-		public TerminalNode DOT() { return getToken(GramaticaParser.DOT, 0); }
 		public List<TerminalNode> ID() { return getTokens(GramaticaParser.ID); }
+		public TerminalNode DOT() { return getToken(GramaticaParser.DOT, 0); }
 		public TerminalNode ID(int i) {
 			return getToken(GramaticaParser.ID, i);
 		}
@@ -3635,11 +3620,8 @@ public class GramaticaParser extends Parser {
 	public boolean sempred(RuleContext _localctx, int ruleIndex, int predIndex) {
 		switch (ruleIndex) {
 		case 11: return exp2_sempred((Exp2Context)_localctx, predIndex);
-
 		case 12: return exp3_sempred((Exp3Context)_localctx, predIndex);
-
 		case 13: return exp4_sempred((Exp4Context)_localctx, predIndex);
-
 		case 14: return exp5_sempred((Exp5Context)_localctx, predIndex);
 		}
 		return true;
@@ -3733,11 +3715,11 @@ public class GramaticaParser extends Parser {
 		"\2\u0085\u0084\3\2\2\2\u0086\t\3\2\2\2\u0087\u0088\7\3\2\2\u0088\u0089"+
 		"\7\f\2\2\u0089\u008a\7.\2\2\u008a\u008b\7\64\2\2\u008b\u0090\5\f\7\2\u008c"+
 		"\u008d\7\66\2\2\u008d\u008f\5\f\7\2\u008e\u008c\3\2\2\2\u008f\u0092\3"+
-		"\2\2\2\u0090\u008e\3\2\2\2\u0090\u0091\3\2\2\2\u0091\u0093\3\2\2\2\u0092"+
-		"\u0090\3\2\2\2\u0093\u009e\7\66\2\2\u0094\u0095\7\16\2\2\u0095\u009b\5"+
+		"\2\2\2\u0090\u008e\3\2\2\2\u0090\u0091\3\2\2\2\u0091\u009e\3\2\2\2\u0092"+
+		"\u0090\3\2\2\2\u0093\u0094\7\66\2\2\u0094\u0095\7\16\2\2\u0095\u009b\5"+
 		"\22\n\2\u0096\u0097\7\66\2\2\u0097\u0098\7\16\2\2\u0098\u009a\5\22\n\2"+
 		"\u0099\u0096\3\2\2\2\u009a\u009d\3\2\2\2\u009b\u0099\3\2\2\2\u009b\u009c"+
-		"\3\2\2\2\u009c\u009f\3\2\2\2\u009d\u009b\3\2\2\2\u009e\u0094\3\2\2\2\u009e"+
+		"\3\2\2\2\u009c\u009f\3\2\2\2\u009d\u009b\3\2\2\2\u009e\u0093\3\2\2\2\u009e"+
 		"\u009f\3\2\2\2\u009f\u00a0\3\2\2\2\u00a0\u00a1\7\65\2\2\u00a1\u00bb\3"+
 		"\2\2\2\u00a2\u00a3\7\t\2\2\u00a3\u00a4\7\f\2\2\u00a4\u00ad\7.\2\2\u00a5"+
 		"\u00aa\5\16\b\2\u00a6\u00a7\7\66\2\2\u00a7\u00a9\5\16\b\2\u00a8\u00a6"+

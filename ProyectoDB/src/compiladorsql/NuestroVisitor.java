@@ -70,7 +70,8 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     public TableMaker elCreador = new TableMaker();
     
     //tabla y constraints se inicializan y el objse arma al final
-    public Table NewlyCreatedTable;
+    public Table ActualTable;
+    public Table ReferencedTable;
     public PkConstraint PkC;
     public FkConstraint FkC;
     public ChConstraint ChC;
@@ -497,14 +498,14 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
 
         //crear obj tabla
-        NewlyCreatedTable = new Table();
-        NewlyCreatedTable.setIDs(columnNames);
-        NewlyCreatedTable.setTipos(columnTypes);
-        NewlyCreatedTable.setNombre(newTBName);
-        NewlyCreatedTable.llenarMapa();
+        ActualTable = new Table();
+        ActualTable.setIDs(columnNames);
+        ActualTable.setTipos(columnTypes);
+        ActualTable.setNombre(newTBName);
+        ActualTable.llenarMapa();
         //si hay constraints se agregan a la tabla nueva
         //agrga tabla al map
-        this.tablasActuales.put(newTBName, NewlyCreatedTable);
+        this.tablasActuales.put(newTBName, ActualTable);
         //crear JSON vacio
         //String Jsoneado = Gsoneador.toJson(classMaker);
         //Jsoneado = Jsoneado +"\n";
@@ -523,14 +524,119 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public Object visitConstraintPK(GramaticaParser.ConstraintPKContext ctx) 
     {
+        //revisar que no exista una primary key en tabla actual
+        if(ActualTable.CheckPK())
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + ActualTable.nombre + " que ya contiene una Primary key" );
+            return (T)"error al agregar primary key si ya existe";
+        }
+        //nombre Constraint
+        String Cname = ctx.ID(0).getText();
+        //verificar nombre de columnas
+        ArrayList<String> ConCols = new ArrayList<String>();
+        for(int i=1; i<ctx.ID().size(); i++)
+        {
+            String ColName = ctx.ID(i).getText();
+            if(ActualTable.ColumnExists(ColName) == false)
+            {
+                this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + ColName + " que no existe en la tabla" + ActualTable.nombre );
+                return (T)"error al agregar primary key sobre una columna que no existe";
+            }
+            ConCols.add(ColName);
+            
+        }
+        //crear Constraint
+        PkConstraint primary = new PkConstraint();
+        primary.name = Cname;
+        primary.PkColumns = ConCols;
+        ActualTable.setPkS(primary);
         return (T)"";
     }
 
     @Override
     public Object visitConstraintFK(GramaticaParser.ConstraintFKContext ctx) 
     {
+        
+        //nombre constraint
+        String FkName = ctx.ID(0).getText();
+        //source columns
+        ArrayList<String> SourceColumns = new ArrayList<String>();
+        for(int i=0; i<ctx.ID().size(); i++)
+        {
+            String SourceName = ctx.ID(i).getText();
+            //revisar si columna existe en tabla
+            if(ActualTable.ColumnExists(SourceName) == false)
+            {
+                this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + SourceName + " que no existe en la tabla" + ActualTable.nombre );
+                return (T)"error al agregar foreign key sobre una columna que no existe";
+            }
+            //revisar si columna no forma parte de la primary key de la tabla actual
+            if(ActualTable.PkS.PkColumns.contains(SourceName))
+            {
+                this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + SourceName + " que forma parte de una Primary Key en la tabla" + ActualTable.nombre );
+                return (T)"error al agregar foreign key sobre una columna que es primary key";
+            }
+            SourceColumns.add(SourceName);
+        }
+        //mandar a traer las columnas de la tabla a referenciar 
+        ArrayList<String> DestinyColumns = (ArrayList<String>)visit(ctx.references());
+        //revisar que el numero de columnas sea el mismo
+        if(SourceColumns.size() != DestinyColumns.size())
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia una cantidad de atributos erronea para la llave foranea" );
+            return (T)"error al agregar foreign key sin que las columnas sean la misma cantidad";
+        }
+        //revisar si los tipos son los mismos en las columnas origen y destino
+        for(int i=0; i<SourceColumns.size(); i++)
+        {
+            String Scolumn = SourceColumns.get(i);
+            String Dcolumn = DestinyColumns.get(i);
+            String TScolumn = this.ActualTable.columnas.get(Scolumn);
+            String TDcolumn = this.ReferencedTable.columnas.get(Dcolumn);
+            if(TScolumn.equals(TDcolumn) == false)
+            {
+                this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia una columna que no es del mismo tipo de la columna a la que hace referencia" );
+                return (T)"error al agregar foreign key sin que las columnas sean la misma cantidad";
+            }
+        }
+        FkConstraint elExtranjero = new FkConstraint(SourceColumns, DestinyColumns, ReferencedTable, FkName);
+        ActualTable.FkS.add(elExtranjero);
         return (T)"";
     }
+
+    @Override
+    public Object visitReferences(GramaticaParser.ReferencesContext ctx) 
+    {
+        String RtableName = ctx.ID(0).getText();
+        //revisar si la tabla a referenciar existe
+        if(this.tablasActuales.containsKey(RtableName) == false)
+        {
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la tabla " + RtableName + " que no existe");
+            return (T)"error al agregar foreign key referenciando a una tabla que no existe";
+        }
+        this.ReferencedTable = this.tablasActuales.get(RtableName);
+        ArrayList<String> destinyColumns = new ArrayList<String>();
+        for(int i=1; i<ctx.ID().size(); i++)
+        {
+            //revisar si la tabla referenciada contiene las referencias
+            String DestinyName = ctx.ID(i).getText();
+            if(ReferencedTable.ColumnExists(DestinyName) == false)
+            {
+                this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + DestinyName + " que no existe en la tabla " + ReferencedTable);
+                return (T)"error al agregar foreign key referenciando a una columna que no existe";
+            }
+            //revisar si las columnas referenciadas son primary key
+            if(ReferencedTable.PkS.PkColumns.contains(DestinyName) == false)
+            {
+                this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + DestinyName + " que no es primary key en la tabla " + ReferencedTable);
+                return (T)"error al agregar foreign key referenciando a una columna que no es primary key";
+            }
+            destinyColumns.add(DestinyName);
+        }
+        return (T)destinyColumns;
+    }
+    
+    
 
     @Override
     public Object visitConstraintCheck(GramaticaParser.ConstraintCheckContext ctx) 
@@ -556,6 +662,8 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         //eliminar la tabla
         Table aRemover = this.tablasActuales.get(tableName);
         this.tablasActuales.remove(tableName);
+        File aBorrar = new File(this.dirActual + "\\" + tableName+".json");
+        aBorrar.delete();
         return (T)""; 
     }
     

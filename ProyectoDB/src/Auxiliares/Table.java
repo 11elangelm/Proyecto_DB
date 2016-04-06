@@ -22,12 +22,11 @@ public class Table {
     public ArrayList<String> IDs = new ArrayList<String>();
     public ArrayList<String>Tipos = new ArrayList<String>();
     public String nombre;
+    public boolean Pk = false;
     public PkConstraint PkS;
-    public FkConstraint FkS;
-    public ChConstraint ChK;
-    
-    public HashMap<String,String> columnas=new HashMap();
-
+    public ArrayList<FkConstraint> FkS = new ArrayList<FkConstraint>();
+    public ArrayList<ChConstraint> ChK = new ArrayList<ChConstraint>();
+    public HashMap<String,String> columnas = new HashMap();
     public Table(){}
     public Table(String name,ArrayList<String> IDs, ArrayList<String> Tipos) 
     {
@@ -36,15 +35,29 @@ public class Table {
         this.Tipos = Tipos;
         llenarMapa();
     }
-    public Table(String name, ArrayList<String> IDs, ArrayList<String> Tipos, PkConstraint PkS, FkConstraint FkS, ChConstraint ChK)
+    public Table(String name, ArrayList<String> IDs, ArrayList<String> Tipos, PkConstraint PkS, ArrayList<FkConstraint> FkS, ArrayList<ChConstraint> ChK)
     {
         this.nombre = name;
         this.IDs = IDs;
         this.Tipos = Tipos;
         this.PkS = PkS;
+        this.Pk = true;
         this.FkS = FkS;
         this.ChK = ChK;
         llenarMapa();
+    }
+    public void setPkS(PkConstraint PkS)
+    {
+        this.PkS = PkS;
+        this.Pk = true;
+    }
+    public boolean ColumnExists(String Column)
+    {
+        return this.IDs.contains(Column);
+    }
+    public boolean CheckPK()
+    {
+        return Pk;
     }
     
     public void llenarMapa()

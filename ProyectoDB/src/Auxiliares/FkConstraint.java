@@ -16,11 +16,11 @@ public class FkConstraint
 {
     public ArrayList<String> FkColumnsSource = new ArrayList<String>();
     public ArrayList<String> FkColumnsDestiny = new ArrayList<String>();
-    public ArrayList<Table> references = new ArrayList<Table>();
+    public Table references = new Table();
     public String name = "";
     
     public FkConstraint(){}
-    public FkConstraint(ArrayList<String> FkColumnsSource, ArrayList<String> FkColumnsDestiny, ArrayList<Table> references, String name)
+    public FkConstraint(ArrayList<String> FkColumnsSource, ArrayList<String> FkColumnsDestiny, Table references, String name)
     {
         
         this.FkColumnsSource = FkColumnsSource;

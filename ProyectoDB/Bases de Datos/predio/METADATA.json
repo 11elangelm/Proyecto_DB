@@ -1,0 +1,1 @@
+{"cantRegistros":0,"IDs":["placa","linea","modelo"],"Tipos":["char(20)","char(20)","int"],"nombre":"carro","columnas":{"placa":"char(20)","linea":"char(20)","modelo":"int"}}

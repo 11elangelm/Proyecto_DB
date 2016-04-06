@@ -1,2 +1,0 @@
-{"cantRegistros":0,"IDs":["nombre","sueldo","nacimiento"],"Tipos":["char(12)","float","date"],"nombre":"empleado","columnas":{"sueldo":"float","nombre":"char(12)","nacimiento":"date"}}
-{"cantRegistros":0,"IDs":["apertura","empleados","direccion"],"Tipos":["date","int","char(33)"],"nombre":"local","columnas":{"direccion":"char(33)","empleados":"int","apertura":"date"}}

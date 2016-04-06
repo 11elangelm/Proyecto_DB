@@ -65,16 +65,26 @@ CREATE TABLE empleado (id int, nombre char(20) CONSTRAINT pkEmpleado PRIMARY KEY
 
 create database agencia;
 use database agencia;
-create table carro(marca char(20),precio float,id int)
+create table carro(marca char(20),precio float,id int);
+create table cosas(dedos int, marca float, precio int);
+create table ramas (nombre int);
+create table persona(edad int,nacimiento date,sueldo float,nombre char(20));
 
 use database agencia;
 use database liga
 
+{"marca":"maserati","precio":"9876.23","id":"14"}
+{"marca":"porsche","precio":"876.23","id":"5"}
 {"marca":"audi","precio":"12564.65","id":"1"}
 {"marca":"bmw","precio":"13564.65","id":"2"}
 {"marca":"mercedes","precio":"14564.65","id":"3"}
 {"marca":"ferrari","precio":"15564.65","id":"4"}
 
+{"marca":"12.2","precio":"1","dedos":"334"}
+{"marca":"32.12","precio":"2","dedos":"12"}
+{"marca":"32.13","precio":"3","dedos":"91"}
+
+{"sauce":"31"}
 
 {"nombre":"roberto","sueldo":"100.3","nacimiento":"duda1"}
 {"nombre":"juan carlos","sueldo":"65.23","nacimiento":"duda2"}
@@ -119,3 +129,19 @@ create table nueva (dedos int);
 alter table nueva add column edad int;
 alter table nueva rename to persona;
 alter table persona drop column dedos
+
+
+drop database jg;
+create database jg;
+use database jg;
+create table nf(dedos int);
+alter table nf add column raro int;
+alter table nf add column raros int;
+alter table nf rename to hp
+
+
+
+create database agencia;
+use database agencia;
+create table carro(marca char(20),precio float,id int);
+create table cosas(dedos int, marca float, precio int);

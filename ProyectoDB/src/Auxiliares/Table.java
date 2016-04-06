@@ -27,6 +27,9 @@ public class Table {
     public ArrayList<FkConstraint> FkS = new ArrayList<FkConstraint>();
     public ArrayList<ChConstraint> ChK = new ArrayList<ChConstraint>();
     public HashMap<String,String> columnas = new HashMap();
+    public HashMap<String, String> getColumnas() {
+        return columnas;
+    }
     public Table(){}
     public Table(String name,ArrayList<String> IDs, ArrayList<String> Tipos) 
     {

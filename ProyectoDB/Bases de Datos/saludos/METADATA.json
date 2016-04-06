@@ -1,3 +1,0 @@
-{"cantRegistros":0,"IDs":["saludo1","saludo2"],"Tipos":["null","int"],"nombre":"hola","columnas":{"saludo1":"null","saludo2":"int"}}
-{"cantRegistros":0,"IDs":["saludo1","saludo2"],"Tipos":["null","int"],"nombre":"hola","columnas":{"saludo1":"null","saludo2":"int"}}
-{"cantRegistros":0,"IDs":["hola","adios"],"Tipos":["char(15)","int"],"nombre":"saludos1","columnas":{"hola":"char(15)","adios":"int"}}

@@ -42,16 +42,6 @@ public class CompiladorSQL {
         mv.setVerbose(vB);
         mv.visit(tree);
         
-        //mostrar las cosas creadas
-        //mv.getMDglob();
-        //mv.getMDloc();
-        
-        ArrayList<String> n=new ArrayList();
-        n.add("Nombre");n.add("Sueldo");n.add("Camisola");
-        ArrayList<String> t=new ArrayList();
-        t.add("char(20)");t.add("float");t.add("int");
-        
-        
         //revisar si la bandera para mostrar el arbol es verdadera
         if(vA){
             mostrarArbol();

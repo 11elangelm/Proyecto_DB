@@ -1,0 +1,1 @@
+{"cantRegistros":0,"IDs":["edad","marca"],"Tipos":["int","char(22)"],"nombre":"mesa","columnas":{"marca":"char(22)","edad":"int"}}

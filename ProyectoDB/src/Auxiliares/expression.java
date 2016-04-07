@@ -182,7 +182,7 @@ public class expression
             String FinalName = TName + "_" + CName;
             type2 = tablon.columnas.get(FinalName);
             String sabeers = registro.get(FinalName);
-            
+            segundo = new factor(sabeers);
             if(type2.equals("int"))
             {
             }

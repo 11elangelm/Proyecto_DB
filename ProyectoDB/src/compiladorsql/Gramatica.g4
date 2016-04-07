@@ -47,25 +47,22 @@ type: INT #tipoEntero
 
 constraint: ID PRIMARY KEY LPARENT (ID(COMMA ID)*)* RPARENT #constraintPK
 | ID FOREIGN KEY  LPARENT (ID (COMMA ID)*)* RPARENT references #constraintFK
-| ID CHECK (exp1) #constraintCheck
+| ID CHECK (finalExpression) #constraintCheck
 ;
 
 references: REFERENCES ID (LPARENT (ID(COMMA ID)*)* RPARENT)?;
-
-exp1: exp2;
-
-exp2: exp2 andExp exp3 | exp3;
-
-exp3: exp3 orExp exp4 | exp4;
-
-exp4: exp4 eqExp exp5 | exp5;
-
-exp5: exp5 glExp unarianFactorExp | unarianFactorExp;
+finalExpression :fullExpression | NOT fullExpression ;
+fullExpression: generalExpression | LPARENT generalExpression RPARENT;
+generalExpression: booleanExpression | normalExpression;
+booleanExpression: LPARENT fullExpression RPARENT boolOp LPARENT fullExpression RPARENT;
+normalExpression: factor normalOp factor;
+boolOp: andExp | orExp;
+normalOp: eqExp | glExp;
+         
 
 unarianFactorExp: NOT factor | factor;
 
 factor: literal
-| LPARENT exp1 RPARENT
 | ID(DOT ID)?;
 
 literal: value;
@@ -97,14 +94,14 @@ nUM_DAY:NUM;
 
 character: CHARACTER;
 
-update: UPDATE ID SET asignacion (COMMA asignacion)* (WHERE exp1)?;
+update: UPDATE ID SET asignacion (COMMA asignacion)* (WHERE finalExpression)?;
 
 asignacion: ID EQ literal;
 cond: (expression relExp ( value | expression)) (exp cond)?;
 
-delete: DELETE FROM ID (WHERE exp1)?;
+delete: DELETE FROM ID (WHERE finalExpression)?;
 
-query: SELECT (ASTERISK | column (COMMA column ) * ) FROM ID (COMMA ID)* (WHERE exp1)? (ORDER BY orderBy (COMMA orderBy)*)?;
+query: SELECT (ASTERISK | column (COMMA column ) * ) FROM ID (COMMA ID)* (WHERE finalExpression)? (ORDER BY orderBy (COMMA orderBy)*)?;
 
 column: ID(DOT ID)?;
 

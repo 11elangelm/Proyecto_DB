@@ -93,36 +93,6 @@ public interface GramaticaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCharacter(@NotNull GramaticaParser.CharacterContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link GramaticaParser#exp5}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExp5(@NotNull GramaticaParser.Exp5Context ctx);
-	/**
-	 * Visit a parse tree produced by {@link GramaticaParser#exp4}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExp4(@NotNull GramaticaParser.Exp4Context ctx);
-	/**
-	 * Visit a parse tree produced by {@link GramaticaParser#exp3}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExp3(@NotNull GramaticaParser.Exp3Context ctx);
-	/**
-	 * Visit a parse tree produced by {@link GramaticaParser#exp2}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExp2(@NotNull GramaticaParser.Exp2Context ctx);
-	/**
-	 * Visit a parse tree produced by {@link GramaticaParser#exp1}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExp1(@NotNull GramaticaParser.Exp1Context ctx);
-	/**
 	 * Visit a parse tree produced by {@link GramaticaParser#exp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -173,6 +143,12 @@ public interface GramaticaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitQuery(@NotNull GramaticaParser.QueryContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link GramaticaParser#normalExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNormalExpression(@NotNull GramaticaParser.NormalExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link GramaticaParser#nUM_YEAR}.
 	 * @param ctx the parse tree
@@ -231,6 +207,12 @@ public interface GramaticaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDecimal(@NotNull GramaticaParser.DecimalContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link GramaticaParser#generalExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGeneralExpression(@NotNull GramaticaParser.GeneralExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code addColumnTB}
 	 * labeled alternative in {@link GramaticaParser#tableAction}.
@@ -326,6 +308,18 @@ public interface GramaticaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDOperation(@NotNull GramaticaParser.DOperationContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link GramaticaParser#boolOp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBoolOp(@NotNull GramaticaParser.BoolOpContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link GramaticaParser#normalOp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNormalOp(@NotNull GramaticaParser.NormalOpContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link GramaticaParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -346,6 +340,12 @@ public interface GramaticaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMostrarTablasTB(@NotNull GramaticaParser.MostrarTablasTBContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link GramaticaParser#finalExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFinalExpression(@NotNull GramaticaParser.FinalExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link GramaticaParser#column}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -364,6 +364,12 @@ public interface GramaticaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitEliminarTB(@NotNull GramaticaParser.EliminarTBContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link GramaticaParser#booleanExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBooleanExpression(@NotNull GramaticaParser.BooleanExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code renameTB}
 	 * labeled alternative in {@link GramaticaParser#tableAction}.
@@ -405,4 +411,10 @@ public interface GramaticaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitEliminarDB(@NotNull GramaticaParser.EliminarDBContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link GramaticaParser#fullExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFullExpression(@NotNull GramaticaParser.FullExpressionContext ctx);
 }

@@ -145,56 +145,6 @@ public interface GramaticaListener extends ParseTreeListener {
 	 */
 	void exitCharacter(@NotNull GramaticaParser.CharacterContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GramaticaParser#exp5}.
-	 * @param ctx the parse tree
-	 */
-	void enterExp5(@NotNull GramaticaParser.Exp5Context ctx);
-	/**
-	 * Exit a parse tree produced by {@link GramaticaParser#exp5}.
-	 * @param ctx the parse tree
-	 */
-	void exitExp5(@NotNull GramaticaParser.Exp5Context ctx);
-	/**
-	 * Enter a parse tree produced by {@link GramaticaParser#exp4}.
-	 * @param ctx the parse tree
-	 */
-	void enterExp4(@NotNull GramaticaParser.Exp4Context ctx);
-	/**
-	 * Exit a parse tree produced by {@link GramaticaParser#exp4}.
-	 * @param ctx the parse tree
-	 */
-	void exitExp4(@NotNull GramaticaParser.Exp4Context ctx);
-	/**
-	 * Enter a parse tree produced by {@link GramaticaParser#exp3}.
-	 * @param ctx the parse tree
-	 */
-	void enterExp3(@NotNull GramaticaParser.Exp3Context ctx);
-	/**
-	 * Exit a parse tree produced by {@link GramaticaParser#exp3}.
-	 * @param ctx the parse tree
-	 */
-	void exitExp3(@NotNull GramaticaParser.Exp3Context ctx);
-	/**
-	 * Enter a parse tree produced by {@link GramaticaParser#exp2}.
-	 * @param ctx the parse tree
-	 */
-	void enterExp2(@NotNull GramaticaParser.Exp2Context ctx);
-	/**
-	 * Exit a parse tree produced by {@link GramaticaParser#exp2}.
-	 * @param ctx the parse tree
-	 */
-	void exitExp2(@NotNull GramaticaParser.Exp2Context ctx);
-	/**
-	 * Enter a parse tree produced by {@link GramaticaParser#exp1}.
-	 * @param ctx the parse tree
-	 */
-	void enterExp1(@NotNull GramaticaParser.Exp1Context ctx);
-	/**
-	 * Exit a parse tree produced by {@link GramaticaParser#exp1}.
-	 * @param ctx the parse tree
-	 */
-	void exitExp1(@NotNull GramaticaParser.Exp1Context ctx);
-	/**
 	 * Enter a parse tree produced by {@link GramaticaParser#exp}.
 	 * @param ctx the parse tree
 	 */
@@ -280,6 +230,16 @@ public interface GramaticaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitQuery(@NotNull GramaticaParser.QueryContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GramaticaParser#normalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterNormalExpression(@NotNull GramaticaParser.NormalExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GramaticaParser#normalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitNormalExpression(@NotNull GramaticaParser.NormalExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link GramaticaParser#nUM_YEAR}.
 	 * @param ctx the parse tree
@@ -378,6 +338,16 @@ public interface GramaticaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDecimal(@NotNull GramaticaParser.DecimalContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GramaticaParser#generalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterGeneralExpression(@NotNull GramaticaParser.GeneralExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GramaticaParser#generalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitGeneralExpression(@NotNull GramaticaParser.GeneralExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code addColumnTB}
 	 * labeled alternative in {@link GramaticaParser#tableAction}.
@@ -537,6 +507,26 @@ public interface GramaticaListener extends ParseTreeListener {
 	 */
 	void exitDOperation(@NotNull GramaticaParser.DOperationContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link GramaticaParser#boolOp}.
+	 * @param ctx the parse tree
+	 */
+	void enterBoolOp(@NotNull GramaticaParser.BoolOpContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GramaticaParser#boolOp}.
+	 * @param ctx the parse tree
+	 */
+	void exitBoolOp(@NotNull GramaticaParser.BoolOpContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GramaticaParser#normalOp}.
+	 * @param ctx the parse tree
+	 */
+	void enterNormalOp(@NotNull GramaticaParser.NormalOpContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GramaticaParser#normalOp}.
+	 * @param ctx the parse tree
+	 */
+	void exitNormalOp(@NotNull GramaticaParser.NormalOpContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link GramaticaParser#expression}.
 	 * @param ctx the parse tree
 	 */
@@ -571,6 +561,16 @@ public interface GramaticaListener extends ParseTreeListener {
 	 */
 	void exitMostrarTablasTB(@NotNull GramaticaParser.MostrarTablasTBContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link GramaticaParser#finalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterFinalExpression(@NotNull GramaticaParser.FinalExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GramaticaParser#finalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitFinalExpression(@NotNull GramaticaParser.FinalExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link GramaticaParser#column}.
 	 * @param ctx the parse tree
 	 */
@@ -602,6 +602,16 @@ public interface GramaticaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitEliminarTB(@NotNull GramaticaParser.EliminarTBContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GramaticaParser#booleanExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBooleanExpression(@NotNull GramaticaParser.BooleanExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GramaticaParser#booleanExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBooleanExpression(@NotNull GramaticaParser.BooleanExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code renameTB}
 	 * labeled alternative in {@link GramaticaParser#tableAction}.
@@ -672,4 +682,14 @@ public interface GramaticaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitEliminarDB(@NotNull GramaticaParser.EliminarDBContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GramaticaParser#fullExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterFullExpression(@NotNull GramaticaParser.FullExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GramaticaParser#fullExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitFullExpression(@NotNull GramaticaParser.FullExpressionContext ctx);
 }

@@ -212,3 +212,30 @@ use database pruebas;
 insert into todos(id, nac,edad,nombre) values (2,'2007-04-18',21,'angel');
 
 //show columns from todos
+
+
+
+use database otrasp;
+//drop table fks;
+//create table fks (idPer int,edadPer int, constraint fks foreign key (idPer,edadPer) references pks (id,edad) )
+//insert into pks (edad,nombre,id)values(12,'harrypoter',75)
+//insert into fks (idPer,edadPer)values(1,13);
+//insert into fks (idPer,edadPer)values(2,18);
+//create table refri(id int,precio float, marca char(12), fabrica date, constraint pkRefri primary key (id,precio,marca,fabrica));
+//create table prod (idRefri int, precioCosto float, marcaRefri char(12), fechaFab date,precioVenta float, constraint fk foreign key (idRefri,precioCosto,marcaRefri,fechaFab) references refri (id,precio,marca,fabrica))
+
+
+
+
+use database otrasp;
+//drop table fks;
+//create table fks (idPer int,edadPer int, constraint fks foreign key (idPer,edadPer) references pks (id,edad) )
+//insert into pks (edad,nombre,id)values(12,'harrypoter',75)
+//insert into fks (idPer,edadPer)values(1,13);
+//insert into fks (idPer,edadPer)values(2,18);
+//create table refri(id int,precio float, marca char(12), fabrica date, constraint pkRefri primary key (id,precio,marca,fabrica));
+//create table prod (idRefri int, precioCosto float, marcaRefri char(12), fechaFab date,precioVenta float, constraint fk foreign key (idRefri,precioCosto,marcaRefri,fechaFab) references refri (id,precio,marca,fabrica))
+//insert into refri (id,precio,marca,fabrica) values (2,100.2,'Samsung','2007-08-01');
+insert into prod (idRefri,precioCosto,marcaRefri,fechaFab) values(1,100.2, 'LG','2007-08-01')
+
+

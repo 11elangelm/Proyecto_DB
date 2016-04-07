@@ -408,12 +408,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         ArrayList<String> columnNames = new ArrayList();
         ArrayList<String> columnTypes = new ArrayList();
         this.revVerb("revisar si hay una DB en uso para crear la tabla");
-        try {
-            crearArchivo(this.dirActual + "\\" + newTBName+".json");
-        } catch (IOException ex) {
-            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-            return (T)"error al crear nuevo archivo para la tabla escogida";
-        }
+        
         if(!this.bUse){
             revVerb("no hay DB seleccionada");
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no pueder crear una tabla porque no hay DB seleccionada");
@@ -453,6 +448,12 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 return (T)visit;
             }
         }
+        try {
+            crearArchivo(this.dirActual + "\\" + newTBName+".json");
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+            return (T)"error al crear nuevo archivo para la tabla escogida";
+        }
         
         //agrga tabla al map
         this.tablasActuales.put(newTBName, ActualTable);
@@ -467,7 +468,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
 //        System.out.println("***********************->"+this.dirActual);
         String nameDB=this.dirActual.substring(this.dirActual.lastIndexOf("\\")+1);
-        System.out.println(nameDB);
+//        System.out.println(nameDB);
         DataBase get = this.bases.get(nameDB);
         get.setNumTablas(get.getNumTablas()+1);
         //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA
@@ -590,14 +591,14 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             String DestinyName = ctx.ID(i).getText();
             if(ReferencedTable.ColumnExists(DestinyName) == false)
             {
-                this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + DestinyName + " que no existe en la tabla " + ReferencedTable);
+                this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + DestinyName + " que no existe en la tabla " + ReferencedTable.getNombre());
                 return (T)"error al agregar foreign key referenciando a una columna que no existe";
             }
             
             //revisar si las columnas referenciadas son primary key
             if(ReferencedTable.PkS.PkColumns.contains(DestinyName) == false)
             {
-                this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + DestinyName + " que no es primary key en la tabla " + ReferencedTable);
+                this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la columna " + DestinyName + " que no es primary key en la tabla " + ReferencedTable.getNombre());
                 return (T)"error al agregar foreign key referenciando a una columna que no es primary key";
             }
             
@@ -1006,7 +1007,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     
     @Override
     public T visitInsert(GramaticaParser.InsertContext ctx) {
-        
+        revVerb("revisar que DB exista");
         if(!this.bUse){
             revVerb("no hay DB seleccionada");
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede crear una tabla porque no hay DB seleccionada");
@@ -1016,10 +1017,10 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         String nameTabla=ctx.ID().getText();
         revVerb("buscando la tabla "+nameTabla);
-        Table tabla = this.tablasActuales.get(nameTabla);
-        
+        Table tablaXInsertar = this.tablasActuales.get(nameTabla);
+        revVerb("revisar que TB exista");
 //        REVISAR QUE LA TABLA SI EXISTA
-        if(!(tabla!=null)){
+        if(!(tablaXInsertar!=null)){
             this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque esta no existe");
             return (T)"error porque no existe la tabla escogida";
         }
@@ -1029,12 +1030,12 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         
         List<String> valores;
-        HashMap tmp;
+        HashMap nuevoRegistro;
         
         if(orden.size()>0){
-            
+            revVerb("orden de columnas explicito");
             for (String columna : orden) {
-                if(!tabla.IDs.contains(columna)){
+                if(!tablaXInsertar.IDs.contains(columna)){
                     this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque una de las columnas definidas no existe");
                     return (T)"error porque no existe la columna escogida";
                 }
@@ -1059,25 +1060,24 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 
 //                System.out.println("la tabla no tiene datos");
                 ContenidoTabla cont = new ContenidoTabla();
-                cont.setTabla(tabla);
-                this.registrosTablasActuales.put(tabla.getNombre(), cont);
-                registros=this.registrosTablasActuales.get(tabla.getNombre());
+                cont.setTabla(tablaXInsertar);
+                this.registrosTablasActuales.put(tablaXInsertar.getNombre(), cont);
+                registros=this.registrosTablasActuales.get(tablaXInsertar.getNombre());
             }
-            /************************
-             *          FALTA REVISAR LO DE LAS CONSTRAINTS
-             ************************/
-
-            tmp=new HashMap();
+            
+            //VARIABLE QUE ES EL NUEVO REGISTRO POR INSERTAR
+            nuevoRegistro=new HashMap();
 
 
             /************************
              * REVISAR QUE EL TIPO DE LAS COLUMNAS COINCIDA
              * SEGUN EL ORDEN QUE EL USUARIO DEFINIÓ
              ************************/
-            HashMap<String, String> columnas = tabla.getColumnas();
-
-            for (int i = 0; i < tabla.IDs.size(); i++) {
-                String columna=tabla.IDs.get(i);
+            HashMap<String, String> columnas = tablaXInsertar.getColumnas();
+            boolean bctpk=false,bctfk=false;
+            revVerb("se van a hacer revisiones sobre los valores por insertar");
+            for (int i = 0; i < tablaXInsertar.IDs.size(); i++) {
+                String columna=tablaXInsertar.IDs.get(i);
 
                 if(orden.contains(columna)){
                     int indice=orden.indexOf(columna);
@@ -1096,31 +1096,33 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                     }
                     
 //                    REVISAR SI LA COLUMNA QUE VOY A INSERTAR ES PRIMARY KEY
-                    if( tabla.CheckPK() ){
-                        
+                    if( tablaXInsertar.CheckPK() && !bctpk ){
+                        revVerb("revisar si cumple con restricciones de la primary key");
                         if(registros!=null){
                             
-//                        HACER UNA COMPARACION CORRECTA EN CASO DE QUE SEAN VARIAS COLUMNAS
-                            
-                            if(tabla.PkS.PkColumns.size()>1){
-                                 int numMagico=tabla.PkS.PkColumns.size();
+//                        HACER UNA COMPARACION CORRECTA EN CASO DE QUE SEAN VARIAS COLUMNAS LA PRIMARY KEY
+                            if(tablaXInsertar.PkS.PkColumns.size()>1 ){
+//                                System.out.println("revisando llaves primarias");
+                                 int numMagico=tablaXInsertar.PkS.PkColumns.size();
+//                                 REVISO CADA REGISTRO DE LA TABLA PARA VER SI ALGUIEN YA TIENE LOS MISMOS VALORES DE LA PK
                                 for (HashMap fila : registros.getLista()) {
                                     int cont=0;
                                     int j=0;
                                     String elFallo="";
-                                    for (String columnaPk : tabla.PkS.PkColumns) {
+//                                    
+                                    for (String columnaPk : tablaXInsertar.PkS.PkColumns) {
                                         int indixPk=orden.indexOf(columnaPk);
                                         String elValors = valores.get(indixPk);//.substring(val.indexOf("-")+1);
                                         elValors=elValors.substring(elValors.indexOf("-"));
-                                        
-                                        if(tabla.Tipos.get(tabla.IDs.indexOf(columnaPk)).equals("date")){
-                                            
+//                                        System.out.println("voy a revisar este valor x insertat: "+elValors);
+                                        if(tablaXInsertar.Tipos.get(tablaXInsertar.IDs.indexOf(columnaPk)).equals("date")){
+//                                            System.out.println("es una fecha");
                                             //System.out.println(elValors);
                                             Date nd=new Date(Integer.parseInt(elValors.substring(2, 6)) ,
                                                     Integer.parseInt(elValors.substring(7, 9)) , 
                                                     Integer.parseInt(elValors.substring(10,12)) );
                                             String elVal = (String) fila.get(columnaPk);
-                                            
+//                                            System.out.println("contra este valor: "+elVal);
                                             Date nd2;
                                             if(!elVal.equals("")){
                                                 nd2=new Date(Integer.parseInt(elVal.substring(1, 5)) ,
@@ -1132,7 +1134,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                                             
                                             
                                             if(nd.compareTo(nd2)==0){
-                                                
+//                                                System.out.println("son iguales");
                                                 elFallo+=elValors+",";
                                                 cont++;
                                             }else{
@@ -1140,8 +1142,10 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                                                 break;
                                             }
                                         }else{
+                                            elValors=elValors.substring(1);
+//                                            System.out.println("contra este valor: "+fila.get(columnaPk));
                                             if(fila.get(columnaPk).equals(elValors)){
-                                                
+//                                                System.out.println("son iguales");
                                                 elFallo+=elValors+",";
                                                 cont++;
                                             }else{
@@ -1156,36 +1160,81 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                                     }
                                     
                                 }
+                                bctpk=true;
                             }else{
-                                for (HashMap fila : registros.getLista()) {
-                                    if(fila.get(columna).equals(valorColumnaXinsertar)){
-                                        this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el valor:" +columna+"="+valorColumnaXinsertar+" ya existe en la tabla");
-                                        return (T)"error al insertar valor duplicado por PK";
+                                if(!bctpk){
+                                    for (HashMap fila : registros.getLista()) {
+                                        if(fila.get(columna).equals(valorColumnaXinsertar)){
+                                            this.errores.add("La linea:"+ctx.start.getLine()+", no puede insertar en la tabla ("+nameTabla+") porque el valor:" +columna+"="+valorColumnaXinsertar+" ya existe en la tabla");
+                                            return (T)"error al insertar valor duplicado por PK";
+                                        }
                                     }
+                                    bctpk=true;
                                 }
                             }
                         }
                     }
 //                    REVISAR LOS VALORES DE LAS FOREIGN KEYS
-                    
-                    if(tabla.FkS.size()>0){
-                        for (FkConstraint constraint : tabla.FkS) {
+//                    System.out.println(tabla.toString());
+                    if(tablaXInsertar.FkS.size()>0 && !bctfk){
+                        revVerb("revisar si cumple con restricciones de la foreign key");
+//                        System.out.println("hay FKS!!");
+//                        ITERAR SOBRE TODAS LAS FOREIGN KEYS DE LA TABLA
+                        for (FkConstraint constraint : tablaXInsertar.FkS) {
                             
-                            Table tb=constraint.references;
+//                            LLENO UNA LISTA CON LOS NOMBRE DE LAS COLUMNA QUE DEBO REVISAR 
+                            Table tablaReferenciada=constraint.references;
+//                            System.out.println(tablaReferenciada.toString());
                             ArrayList<String>noms=new ArrayList();
-                            for (String columnaNameXjustificar : constraint.FkColumnsSource) {
-                                if(tb.IDs.contains(columnaNameXjustificar)){
+                            for (String columnaNameXjustificar : constraint.FkColumnsDestiny) {
+//                                System.out.println("voy en esta columna "+columnaNameXjustificar);
+                                if(tablaReferenciada.IDs.contains(columnaNameXjustificar)){
                                     noms.add(columnaNameXjustificar);
                                 }
                             }
-                            
-                            ContenidoTabla regist = this.registrosTablasActuales.get(tb.getNombre());
+//                            System.out.println("lista llena");
+//                            System.out.println(noms.toString());
+//                            REVISAR EN LOS DATOS QUE EL DATO INGRESADO SI EXISTA 
+                            ContenidoTabla regist = this.registrosTablasActuales.get(tablaReferenciada.getNombre());
                             if(regist!=null){
-                                int ct=0;
-                                for (HashMap fila : regist.getLista()) {
+//                                System.out.println("hay registros");
+                                
+//                                REVISAR SOBRE LAS FILAS DE LA TABLA ACTUAL
+                                for (HashMap<String,String> fila : regist.getLista()) {
+//                                    System.out.println("****nueva comp entre registros****");
+                                    int ct=0;
+//                                    REVISAR EN TODAS LAS COLUMNAS QUE SON LLAVE PRIMARIA
                                     for (String nombreCol : noms) {
-                                        String valor = (String) fila.get(fila);
+//                                       System.out.println("busco la columna:"+nombreCol);
+//                                        System.out.println(orden.toString());
+                                        String colNam = constraint.FkColumnsSource.get(constraint.FkColumnsDestiny.indexOf(nombreCol));
+//                                        System.out.println("tengo:"+colNam);
+                                        int indexOf = orden.indexOf(colNam);
+                                        String valorXguardado =(String) fila.get(nombreCol);
+                                        String valorXingresado=valores.get(indexOf);
+                                        String tipoI=valorXingresado.substring(0, valorXingresado.indexOf("-"));
+                                        valorXingresado=valorXingresado.substring(valorXingresado.indexOf("-")+1);
+//                                        System.out.println(tipoI);
+//                                        System.out.println(valorXguardado+"<->"+valorXingresado);
+                                        
+                                        if(valorXguardado.equals(valorXingresado)){
+//                                            System.out.println("match #"+ct);
+                                            ct++;
+                                        }
+                                        
                                     }
+                                    if(ct==noms.size()){
+//                                        System.out.println("ya encontre la fk completa");
+                                        bctfk=true;
+                                        break;
+                                    }
+                                }
+                                
+                                if(!bctfk){
+//                                    System.out.println("no se encuentra el conjunto de llaves ingresados");
+                                    this.errores.add("La linea:"+ctx.start.getLine()+", no puede insertar en la tabla ("+nameTabla+") porque no existen los valores ("+constraint.FkColumnsSource.toString()+") a los que hace referencia en la foreign key \""+constraint.name+"\"");
+                                    return (T)"error con los valores de la fk";
+                                    
                                 }
                             }
                         }
@@ -1194,18 +1243,20 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 //                    REVISAR SI EL TIPO DE LOS VALORES X INSERTAR COINCIDE CON EL ESPERADO
 
 //                    EL SWITCH SE HACE XQ PUEDE EXISTIR LA CONVERSION FORZOSA EN LOS INT Y FLOAT
+                    revVerb("revisar si tipo del valor es el mismo que el de la columna");
                     switch(tipoColumnaEsperado){
+                        
                         case("int"):
 //                            LOS UNICOS TIPOS DE DATOS QUE PUEDO CONVERTIR SON INT Y FLOAT
                             switch(tipoColumnaXinsertar){
                                 case "float":
-                                    tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar.substring(0, valorColumnaXinsertar.indexOf(".")));
+                                    nuevoRegistro.put(nombreColumnaXinsertar, valorColumnaXinsertar.substring(0, valorColumnaXinsertar.indexOf(".")));
                                     break;
                                 case "int":
-                                    tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar);
+                                    nuevoRegistro.put(nombreColumnaXinsertar, valorColumnaXinsertar);
                                     break;
                                 case("null"):
-                                    tmp.put(nombreColumnaXinsertar,"");
+                                    nuevoRegistro.put(nombreColumnaXinsertar,"");
                                     break;
                                 default:
                                     if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
@@ -1220,13 +1271,13 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
                             switch(tipoColumnaXinsertar){
                                 case "float":
-                                    tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar);
+                                    nuevoRegistro.put(nombreColumnaXinsertar, valorColumnaXinsertar);
                                     break;
                                 case "int":
-                                    tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar+".0");
+                                    nuevoRegistro.put(nombreColumnaXinsertar, valorColumnaXinsertar+".0");
                                     break;
                                 case("null"):
-                                    tmp.put(nombreColumnaXinsertar,"");
+                                    nuevoRegistro.put(nombreColumnaXinsertar,"");
                                     break;
                                 default:
                                     if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
@@ -1243,30 +1294,314 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                                 this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tamaño del char encontrado es: ("+valorColumnaXinsertar.length()+") y esperaba como max: ("+tamano+")");
                                 return (T)"error porque no el tamano del char es muy grande";
                             }
-                            tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar);
+                            nuevoRegistro.put(nombreColumnaXinsertar, valorColumnaXinsertar);
                             break;
                         default:
                             if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
                                 this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tipo de "+valorColumnaXinsertar+" es: ("+tipoColumnaXinsertar+") y esperaba: ("+tipoColumnaEsperado+")");
                                 return (T)"error porque no coincide el tipo de columnas provistas para insertar con el tipo de valores para insertar";
                             }
-                            tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar);
+                            nuevoRegistro.put(nombreColumnaXinsertar, valorColumnaXinsertar);
                             break;
                     }
 
                 }else{
-                    tmp.put(columna, "");
+                    nuevoRegistro.put(columna, "");
                 }
             }
             
             //AQUI ESTABA LO DEL FOR DE ARRIBA ANTES
-            
-            registros.addRegistro(tmp);
+            revVerb("se agrego exitosamente el nuevo registro");
+            registros.addRegistro(nuevoRegistro);
             
         }else{
+            System.out.println("ORDEN PREDEFINIDO");
             revVerb("se va a insertar en el orden predefinido");
-            System.out.println("no hay lista jajaja");
+            
+
+//            REVISAR QUE EL NUMERO DE COLUMNAS Y EL DE VALORES COINCIDA
             valores=(List<String>) visit(ctx.insertValues());
+//            System.out.println("---"+valores.size());
+            if(valores.size()>tablaXInsertar.IDs.size()){
+                this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el numero de columnas valores es mayor que el numero de columnas de destino");
+                return (T)"error porque no coincide el numero de columnas provistas con el de valores";
+            }
+            revVerb("el numero de columas por insertar si coincide con el numero de valores provistos");
+            ContenidoTabla registros = this.registrosTablasActuales.get(nameTabla);            
+            
+//            REVISAR SI LA TABLA YA TIENE CONTENIDO EXISTENTE
+            if(!(registros!=null)){ 
+                
+//                System.out.println("la tabla no tiene datos");
+                ContenidoTabla cont = new ContenidoTabla();
+                cont.setTabla(tablaXInsertar);
+                this.registrosTablasActuales.put(tablaXInsertar.getNombre(), cont);
+                registros=this.registrosTablasActuales.get(tablaXInsertar.getNombre());
+            }
+            
+            
+            //VARIABLE QUE ES EL NUEVO REGISTRO POR INSERTAR
+            nuevoRegistro=new HashMap();
+            
+            HashMap<String, String> columnas = tablaXInsertar.getColumnas();
+            
+            boolean bctpk2=false,bctfk2=false;
+            
+            revVerb("se van a hacer revisiones sobre los valores por insertar");
+            
+            for (int i = 0; i < tablaXInsertar.IDs.size(); i++) {    
+                
+                String nombreColumnaEsperado=tablaXInsertar.IDs.get(i);
+                
+                String tipoColumnaEsperado=tablaXInsertar.Tipos.get(i);
+                String val="";
+                String tipoColumnaXinsertar="null";
+                String valorColumnaXinsertar="";
+                
+                
+                try{
+                    val=valores.get(i);
+                    tipoColumnaXinsertar=val.substring(0,val.indexOf("-"));
+                    valorColumnaXinsertar=val.substring(val.indexOf("-")+1);
+                }catch(Exception e){
+                    System.err.println("ERROR EN INDIce");
+                    
+                }
+                
+                if(valorColumnaXinsertar.equals("!!")){
+                    valorColumnaXinsertar="";
+                }
+                //System.out.println(valorColumnaXinsertar    );
+                int tamano=0;
+                if(tipoColumnaEsperado.contains("char")){
+                    tamano=Integer.parseInt(tipoColumnaEsperado.substring(tipoColumnaEsperado.indexOf("(")+1, tipoColumnaEsperado.indexOf(")")));
+                    tipoColumnaEsperado="char";
+
+                }
+                
+//                REVISANDO LAS LLAVES PRIMARIAS
+                if( tablaXInsertar.CheckPK() && !bctpk2 ){
+//                    System.out.println("hay pks");
+                        revVerb("revisar si cumple con restricciones de la primary key");
+                        if(registros!=null){
+                            
+//                        HACER UNA COMPARACION CORRECTA EN CASO DE QUE SEAN VARIAS COLUMNAS LA PRIMARY KEY
+                            if(tablaXInsertar.PkS.PkColumns.size()>1 ){
+//                                System.out.println("revisando llaves primarias");
+                                 int numMagico=tablaXInsertar.PkS.PkColumns.size();
+//                                 REVISO CADA REGISTRO DE LA TABLA PARA VER SI ALGUIEN YA TIENE LOS MISMOS VALORES DE LA PK
+                                for (HashMap fila : registros.getLista()) {
+                                    int cont=0;
+                                    int j=0;
+                                    String elFallo="";
+                                    
+//                                  
+                                    int ft=0;
+                                    for (String columnaPk : tablaXInsertar.PkS.PkColumns) {
+//                                        System.out.println(columnaPk);
+                                        String elValors = valores.get(ft);//.substring(val.indexOf("-")+1);
+                                        ft++;
+                                        elValors=elValors.substring(elValors.indexOf("-")+1);
+//                                        System.out.println("voy a revisar este valor x insertat: "+elValors);
+                                        if(tablaXInsertar.Tipos.get(tablaXInsertar.IDs.indexOf(columnaPk)).equals("date")){
+//                                            System.out.println("es una fecha");
+//                                            System.out.println(elValors);
+                                            Date nd=new Date(Integer.parseInt(elValors.substring(1, 5)) ,
+                                                    Integer.parseInt(elValors.substring(6, 8)) , 
+                                                    Integer.parseInt(elValors.substring(9,11)) );
+                                            String elVal = (String) fila.get(columnaPk);
+//                                            System.out.println("contra este valor: "+elVal);
+                                            Date nd2;
+                                            if(!elVal.equals("")){
+                                                nd2=new Date(Integer.parseInt(elVal.substring(1, 5)) ,
+                                                Integer.parseInt(elVal.substring(6, 8)) , 
+                                                Integer.parseInt(elVal.substring(9,11)) );
+                                            }else{
+                                                nd2=new Date(9999,13,32);
+                                            }
+                                            
+                                            
+                                            if(nd.compareTo(nd2)==0){
+//                                                System.out.println("son iguales");
+                                                elFallo+=elValors+",";
+                                                cont++;
+                                            }else{
+                                                
+                                                break;
+                                            }
+                                        }else{
+                                            
+//                                            System.out.println("contra este valor: "+fila.get(columnaPk));
+                                            if(fila.get(columnaPk).equals(elValors)){
+//                                                System.out.println("son iguales");
+                                                elFallo+=elValors+",";
+                                                cont++;
+                                            }else{
+                                                break;
+                                            }
+                                        }
+                                        
+                                    }
+                                    if(cont==numMagico){
+                                        this.errores.add("La linea:"+ctx.start.getLine()+" , no puede insertar en la tabla ("+nameTabla+") porque los valores de la PRIMARY KEY  ("+elFallo+") ya existen ");
+                                        return(T)"";
+                                    }
+                                    
+                                }
+                                bctpk2=true;
+                            }else{
+                                if(!bctpk2){
+                                    for (HashMap fila : registros.getLista()) {
+                                        if(fila.get(nombreColumnaEsperado).equals(valorColumnaXinsertar)){
+                                            this.errores.add("La linea:"+ctx.start.getLine()+", no puede insertar en la tabla ("+nameTabla+") porque el valor:" +nombreColumnaEsperado+"="+valorColumnaXinsertar+" ya existe en la tabla");
+                                            return (T)"error al insertar valor duplicado por PK";
+                                        }
+                                    }
+                                    bctpk2=true;
+                                }
+                            }
+                        }
+                    }
+//                    REVISAR LOS VALORES DE LAS FOREIGN KEYS
+                
+//                    System.out.println(tablaXInsertar.toString());
+                
+                    if(tablaXInsertar.FkS.size()>0 && !bctfk2){
+                        revVerb("revisar si cumple con restricciones de la foreign key");
+                        System.out.println("hay FKS!!");
+//                        ITERAR SOBRE TODAS LAS FOREIGN KEYS DE LA TABLA
+                        for (FkConstraint constraint : tablaXInsertar.FkS) {
+                            
+//                            LLENO UNA LISTA CON LOS NOMBRE DE LAS COLUMNA QUE DEBO REVISAR 
+                            Table tablaReferenciada=constraint.references;
+                            System.out.println(tablaReferenciada.toString());
+                            ArrayList<String>noms=new ArrayList();
+                            for (String columnaNameXjustificar : constraint.FkColumnsDestiny) {
+//                                System.out.println("voy en esta columna "+columnaNameXjustificar);
+                                if(tablaReferenciada.IDs.contains(columnaNameXjustificar)){
+                                    noms.add(columnaNameXjustificar);
+                                }
+                            }
+                            System.out.println("lista llena");
+                            System.out.println(noms.toString());
+//                            REVISAR EN LOS DATOS QUE EL DATO INGRESADO SI EXISTA 
+                            ContenidoTabla regist = this.registrosTablasActuales.get(tablaReferenciada.getNombre());
+                            if(regist!=null){
+//                                System.out.println("hay registros");
+                                
+//                                REVISAR SOBRE LAS FILAS DE LA TABLA ACTUAL
+                                int jt=0;
+                                for (HashMap<String,String> fila : regist.getLista()) {
+//                                    System.out.println("****nueva comp entre registros****");
+                                    int ct=0;
+//                                    REVISAR EN TODAS LAS COLUMNAS QUE SON LLAVE PRIMARIA
+                                    for (String nombreCol : noms) {
+                                       System.out.println("busco la columna:"+nombreCol);
+//                                        System.out.println(orden.toString());
+                                        String colNam = constraint.FkColumnsSource.get(constraint.FkColumnsDestiny.indexOf(nombreCol));
+                                        System.out.println("tengo:"+colNam);
+                                        int indexOf = orden.indexOf(colNam);
+                                        String valorXguardado =(String) fila.get(nombreCol);
+                                        String valorXingresado=valores.get(jt);
+                                        jt++;
+                                        String tipoI=valorXingresado.substring(0, valorXingresado.indexOf("-"));
+                                        valorXingresado=valorXingresado.substring(valorXingresado.indexOf("-")+1);
+//                                        System.out.println(tipoI);
+                                        System.out.println(valorXguardado+"<->"+valorXingresado);
+                                        
+                                        if(valorXguardado.equals(valorXingresado)){
+                                            System.out.println("match #"+ct);
+                                            ct++;
+                                        }
+                                        
+                                    }
+                                    if(ct==noms.size()){
+                                        System.out.println("ya encontre la fk completa");
+                                        bctfk2=true;
+                                        break;
+                                    }
+                                }
+                                
+                                if(!bctfk2){
+//                                    System.out.println("no se encuentra el conjunto de llaves ingresados");
+                                    this.errores.add("La linea:"+ctx.start.getLine()+", no puede insertar en la tabla ("+nameTabla+") porque no existen los valores ("+constraint.FkColumnsSource.toString()+") a los que hace referencia en la foreign key \""+constraint.name+"\"");
+                                    return (T)"error con los valores de la fk";
+                                    
+                                }
+                            }
+                        }
+                    }
+                
+                
+                
+                revVerb("revisar si tipo del valor es el mismo que el de la columna en la que se va a insertar");
+                
+                switch(tipoColumnaEsperado){
+
+                    case("int"):
+//                            LOS UNICOS TIPOS DE DATOS QUE PUEDO CONVERTIR SON INT Y FLOAT
+                        switch(tipoColumnaXinsertar){
+                            case "float":
+                                nuevoRegistro.put(nombreColumnaEsperado, valorColumnaXinsertar.substring(0, valorColumnaXinsertar.indexOf(".")));
+                                break;
+                            case "int":
+                                nuevoRegistro.put(nombreColumnaEsperado, valorColumnaXinsertar);
+                                break;
+                            case("null"):
+                                nuevoRegistro.put(nombreColumnaEsperado,"");
+                                break;
+                            default:
+                                if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
+                                    this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tipo de "+valorColumnaXinsertar+" es: ("+tipoColumnaXinsertar+") y esperaba: ("+tipoColumnaEsperado+")");
+                                    return (T)"error porque no coincide el tipo de columnas provistas para insertar con el tipo de valores para insertar";
+                                }
+                                break;
+                        }
+
+                        break;
+                    case("float"):
+
+                        switch(tipoColumnaXinsertar){
+                            case "float":
+                                nuevoRegistro.put(nombreColumnaEsperado, valorColumnaXinsertar);
+                                break;
+                            case "int":
+                                nuevoRegistro.put(nombreColumnaEsperado, valorColumnaXinsertar+".0");
+                                break;
+                            case("null"):
+                                nuevoRegistro.put(nombreColumnaEsperado,"");
+                                break;
+                            default:
+                                if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
+                                    this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tipo de "+valorColumnaXinsertar+" es: ("+tipoColumnaXinsertar+") y esperaba: ("+tipoColumnaEsperado+")");
+                                    return (T)"error porque no coincide el tipo de columnas provistas para insertar con el tipo de valores para insertar";
+                                }
+                                break;
+                        }
+
+                        break;
+
+                    case("char"):
+                        if(valorColumnaXinsertar.length()>tamano){
+                            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tamaño del char encontrado es: ("+valorColumnaXinsertar.length()+") y esperaba como max: ("+tamano+")");
+                            return (T)"error porque no el tamano del char es muy grande";
+                        }
+                        nuevoRegistro.put(nombreColumnaEsperado, valorColumnaXinsertar);
+                        break;
+                    default:
+                        if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
+                            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tipo de "+valorColumnaXinsertar+" es: ("+tipoColumnaXinsertar+") y esperaba: ("+tipoColumnaEsperado+")");
+                            return (T)"error porque no coincide el tipo de columnas provistas para insertar con el tipo de valores para insertar";
+                        }
+                        nuevoRegistro.put(nombreColumnaEsperado, valorColumnaXinsertar);
+                        break;
+                }
+                
+            }
+            
+            revVerb("revisar si tipo del valor es el mismo que el de la columna");
+            
+            registros.addRegistro(nuevoRegistro);
         }
         
         return (T)""; //To change body of generated methods, choose Tools | Templates.

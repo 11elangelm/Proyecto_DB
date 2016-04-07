@@ -14,17 +14,28 @@ import java.util.ArrayList;
  */
 public class FkConstraint 
 {
+    public String name = "";
     public ArrayList<String> FkColumnsSource = new ArrayList<String>();
     public ArrayList<String> FkColumnsDestiny = new ArrayList<String>();
     public Table references = new Table();
-    public String name = "";
+    
     
     public FkConstraint(){}
     public FkConstraint(ArrayList<String> FkColumnsSource, ArrayList<String> FkColumnsDestiny, Table references, String name)
     {
         
         this.FkColumnsSource = FkColumnsSource;
+        this.FkColumnsDestiny=FkColumnsDestiny;
         this.references = references;
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "FkConstraint{" + "name=" + name + ", FkColumnsSource=" + FkColumnsSource + ", FkColumnsDestiny=" + FkColumnsDestiny + '}';
+    }
+
+    
+    
+    
 }

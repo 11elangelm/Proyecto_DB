@@ -1,1 +1,2 @@
-{"cantRegistros":0,"IDs":["id"],"Tipos":["int"],"nombre":"cliente","Pk":false,"PkS":{"PkColumns":[],"name":""},"FkS":[],"ChK":[],"columnas":{"id":"int"}}
+{"cantRegistros":0,"IDs":["idCliente","idProducto","totalCompra","id"],"Tipos":["int","int","float","int"],"nombre":"recibo","Pk":true,"PkS":{"PkColumns":["totalCompra"],"name":"pkR"},"FkS":[],"ChK":[],"columnas":{"totalCompra":"float","idCliente":"int","idProducto":"int","id":"int"}}
+{"cantRegistros":4,"IDs":["edad","nombre","id","nac"],"Tipos":["int","char(12)","int","date"],"nombre":"todos","Pk":true,"PkS":{"PkColumns":["nac","id"],"name":"pkTodos"},"FkS":[],"ChK":[],"columnas":{"nac":"date","id":"int","edad":"int","nombre":"char(12)"}}

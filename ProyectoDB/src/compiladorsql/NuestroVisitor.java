@@ -51,8 +51,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
     private String dirBase="Bases de Datos\\",dirActual="";
-    private ArrayList<String> errores,
-            metaDataLOCALTBnames;
+    private ArrayList<String> errores=new ArrayList();
     public Gson Gsoneador = new Gson(); 
             
     public DataBase DBactual;
@@ -80,6 +79,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     private String lastDB="";
     
     private HashMap<String,DataBase> bases;
+    private ArrayList<String> destinyColumns= new ArrayList();
     
 /****************************************************************************************************
                                         NO SE OLVIDEN DE
@@ -91,7 +91,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
     @Override
     public T visitSqlProgram(GramaticaParser.SqlProgramContext ctx) {
-        this.errores=new ArrayList();
         this.metaDataActual=new ArrayList();
         this.tablasActuales=new HashMap();
         this.registrosTablasActuales=new HashMap();
@@ -102,7 +101,10 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
         for (ParseTree child : ctx.statement()) 
         {
-            visit(child);
+            String visit = (String) visit(child);
+            if(visit.contains("error")){
+                return (T)visit;
+            }        
             
         }
         long estimatedTime = System.nanoTime() - startTime;
@@ -116,25 +118,6 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 //            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
         }
         return (T)"";
-    }
-    
-    
-    private void escribirMD(){
-        File file= new File(dirBase+"\\metaData_GENERAL.json");
-        file.delete();
-        try {
-            file.createNewFile();
-        } catch (IOException ex) {
-            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        for (DataBase value : this.bases.values()) {
-            try {
-                this.addToMDGeneral(value);
-            } catch (IOException ex) {
-                Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-        }
     }
     
     /******************
@@ -325,7 +308,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             this.registrosTablasActuales=cargarRegistros(nuevo);
             this.dirActual=dirBase+nombre;
             revVerb("USANDO: "+nuevo.getAbsolutePath());
-
+            
         }
 
 
@@ -456,12 +439,20 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
 
         //crear obj tabla
-        ActualTable = new Table();
-        ActualTable.setIDs(columnNames);
-        ActualTable.setTipos(columnTypes);
-        ActualTable.setNombre(newTBName);
-        ActualTable.llenarMapa();
+        this.ActualTable = new Table();
+        this.ActualTable.setIDs(columnNames);
+        this.ActualTable.setTipos(columnTypes);
+        this.ActualTable.setNombre(newTBName);
+        this.ActualTable.llenarMapa();
         //si hay constraints se agregan a la tabla nueva
+//        revisar que todas las constraints sean validas
+        for (GramaticaParser.ConstraintContext constraint : ctx.constraint()) {
+            String visit = (String) visit(constraint);
+            if(visit.contains("error")){
+                return (T)visit;
+            }
+        }
+        
         //agrga tabla al map
         this.tablasActuales.put(newTBName, ActualTable);
         //crear JSON vacio
@@ -472,16 +463,18 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         //} catch (IOException ex) {
         //    Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
         //}
-        //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA
+        
 //        System.out.println("***********************->"+this.dirActual);
         String nameDB=this.dirActual.substring(this.dirActual.lastIndexOf("\\")+1);
         System.out.println(nameDB);
         DataBase get = this.bases.get(nameDB);
         get.setNumTablas(get.getNumTablas()+1);
+        //SE ASIGNA ESTA VARIBLE PARA QUE FUNCIONE BIEN LA BUSQUEDA
         tablaActualName=dirActual.substring(dirActual.indexOf("\\")+1);
         
         return (T)"";
     }
+    
 
     //visitas para crear constraints
     @Override
@@ -547,10 +540,10 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             return (T)visitReferences;
         }
         
-        ArrayList<String> DestinyColumns = this.destinyColumns;
+        ArrayList<String> DestinyColumns = new ArrayList(this.destinyColumns);
         //revisar que el numero de columnas sea el mismo
         
-        if(SourceColumns.size() != destinyColumns.size())
+        if(SourceColumns.size() != DestinyColumns.size())
         {
             this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia una cantidad de atributos erronea para la llave foranea" );
             return (T)"error al agregar foreign key sin que las columnas sean la misma cantidad";
@@ -568,12 +561,13 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 return (T)"error al agregar foreign key sin que las columnas sean la misma cantidad";
             }
         }
+        
+        //System.out.println("*****->"+DestinyColumns.toString());
         FkConstraint elExtranjero = new FkConstraint(SourceColumns, DestinyColumns, ReferencedTable, FkName);
+        //System.out.println("---->"+elExtranjero.toString());
         ActualTable.FkS.add(elExtranjero);
         return (T)"";
     }
-
-    private ArrayList<String> destinyColumns= new ArrayList();
     
     @Override
     public T visitReferences(GramaticaParser.ReferencesContext ctx) 
@@ -612,14 +606,11 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         return (T)"";
     }
     
-    
-
     @Override
     public T visitConstraintCheck(GramaticaParser.ConstraintCheckContext ctx) 
     {
         return (T)"";
     }
-    
 
     /******************
      *elimina una tabla ya existente 
@@ -643,6 +634,20 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         }
         //eliminar la tabla
         Table aRemover = this.tablasActuales.get(tableName);
+        
+//        ITERAR SOBRE TODAS LAS TABLAS PARA VER SI ALGUNA REFERENCIA A ESTA
+        for (Table tablaXrev : this.tablasActuales.values()) {
+            if(!tablaXrev.getNombre().equals(tablaActualName))
+            //ITERAR SOBRE TODAS LAS FOREIGN KEYS DE LAS TABLAS
+            for (FkConstraint listaFKs : tablaXrev.FkS) {
+                
+                if(listaFKs.references.getNombre().equals(tableName)){
+                    this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "intenta borrar la tabla " + tableName + " que es una constraint en la tabla " +tablaXrev.getNombre()+", primero debe eliminar esta constraint");
+                    return (T)"error al eliminar tabla que no existe";
+                }
+                
+            }
+        }    
         this.tablasActuales.remove(tableName);
         this.registrosTablasActuales.remove(tableName);
         
@@ -692,28 +697,29 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     public T visitMostrarTablasTB(GramaticaParser.MostrarTablasTBContext ctx) 
     {
         if(this.bUse)
-        try {
-            List<Table> tablas = this.getInfoMDLocal(dirActual);
-            if(tablas.isEmpty())
-            {
-                JOptionPane.showMessageDialog(null, "Actualmente no hay tablas en esta base de datos");
+            try {
+                List<Table> tablas = this.getInfoMDLocal(dirActual);
+                if(tablas.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(null, "Actualmente no hay tablas en esta base de datos");
+                }
+                else
+                {
+                JTable toShow = elCreador.ShowTables(tablas);
+                JFrame frame = new JFrame();
+                frame.setTitle("Tablas de Base de Datos Actual");
+    //            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                JScrollPane scrollPane = new JScrollPane(toShow);
+                frame.add(scrollPane, BorderLayout.CENTER);
+                frame.setSize(500, 150);
+                frame.setVisible(true);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
             }
-            else
-            {
-            JTable toShow = elCreador.ShowTables(tablas);
-            JFrame frame = new JFrame();
-            frame.setTitle("Tablas de Base de Datos Actual");
-//            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            JScrollPane scrollPane = new JScrollPane(toShow);
-            frame.add(scrollPane, BorderLayout.CENTER);
-            frame.setSize(500, 150);
-            frame.setVisible(true);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
         return (T)"";
     }
+    
     /******************
      *redirige a las siguientes alter tables 
      *
@@ -722,19 +728,74 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     public T visitAlterarTB(GramaticaParser.AlterarTBContext ctx) {
         if(!this.bUse){
             revVerb("no hay DB seleccionada");
-            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no pueder crear una tabla porque no hay DB seleccionada");
+            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no pueder alterar una tabla porque no hay DB seleccionada");
             return (T)"error porque no hay DB elegida";
             
         }
-        tablaActualName=ctx.ID().getText();
-//        System.out.println("voy a alterar la TB:"+tablaActualName);
+        this.tablaActualName=ctx.ID().getText();
+        if(!this.tablasActuales.containsKey(tablaActualName)){
+            revVerb("no existe la tabla que se quiere modificar");
+            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no pueder alterar la tabla "+tablaActualName+" porque no existe");
+            return (T)"error porque no hay DB elegida";
+        }
         revVerb("voy a alterar la TB:"+tablaActualName);
-        return (T)visitChildren(ctx);
+        this.ActualTable=this.tablasActuales.get(tablaActualName);
+//        System.out.println("voy a alterar la TB:"+tablaActualName);
+        for (GramaticaParser.TableActionContext tableAction : ctx.tableAction()) {
+            String visit = (String) visit(tableAction);
+            if(visit.contains("error")){
+                return (T)visit;
+            }
+        }
+        return (T)"";
     }
+    
+    
+    @Override
+    public T visitDropConstraintTB(GramaticaParser.DropConstraintTBContext ctx) {
+        
+        String nameConstr=ctx.ID().getText();
+        boolean b=false;
+        
+        if(this.ActualTable.CheckPK()){
+            
+            if(this.ActualTable.PkS.name.equals(nameConstr)){
+                this.ActualTable.Pk=false;
+                b=true;
+            }
+        }
+        if(!b)
+            for (FkConstraint fk : this.ActualTable.FkS) {
+                if(fk.name.equals(nameConstr)){
+                    this.ActualTable.FkS.remove(fk);
+                    b=true;
+                    break;
+                }
+            }
+        
+        if(!b){
+            this.errores.add("La linea: " + ctx.start.getLine() + ", (" + ctx.getText() +  ")" + "referencia a la constraint \"" + nameConstr + "\" en la tabla "+this.ActualTable.getNombre()+", pero esta constraint no existe" );
+            return (T)"error al borrar constraint que no existe";
+        }
+        
+        return (T)"";
+    }
+    
+    /******************
+     *agregar constraint a la tabla especificada
+     *
+    *******************/
+    @Override
+    public T visitAddConstraintTB(GramaticaParser.AddConstraintTBContext ctx) {
+        String visit = (String) visit(ctx.constraint());
+        return (T)visit;
+    }
+    
      /******************
      *agrega una columna a la tabla
      *
     *******************/
+    
     @Override
     public T visitAddColumnTB(GramaticaParser.AddColumnTBContext ctx) {
         
@@ -876,7 +937,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                 if(listaFKs.references.getNombre().equals(tablaActualName)){
                     for (String columnaDestinoFK : listaFKs.FkColumnsDestiny) {
                         if(columnaDestinoFK.equals(columnName)){
-                            this.errores.add("La linea: " + ctx.start.getLine() + ", " + "intenta borrar la columna " + columnName + " que es foreign key de la tabla "+tablaXrev+", primero debe eliminar esta constraint" );
+                            this.errores.add("La linea: " + ctx.start.getLine() + ", " + "intenta borrar la columna " + columnName + " que es foreign key de la tabla "+tablaXrev.getNombre()+", primero debe eliminar esta constraint" );
                             return (T)"error al tratar de eliminar columna que existe";
                         }
                     }
@@ -884,6 +945,17 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             }
         }
         
+        
+//        revisar si es primary key de la tabla
+//        para cambiar la bandera
+        if(tabla.CheckPK()){
+            if(tabla.PkS.PkColumns.contains(columnName)){
+                tabla.PkS.PkColumns.remove(columnName);
+                if(tabla.PkS.PkColumns.size()>0){
+                     tabla.Pk=false;
+                }
+            }
+        }
         int indice = tabla.IDs.indexOf(columnName);
         tabla.IDs.remove(indice);
         tabla.Tipos.remove(indice);
@@ -953,10 +1025,19 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
 //        REVISAR SI LA LISTA DE COLUMNAS FUE PROVISTA POR EL USUARIO O SIMPLEMENTE USO EL ORDEN IMPLÍCITO
         List<String> orden = (List<String>)visit(ctx.insertColumns());
+        
+        
         List<String> valores;
         HashMap tmp;
         
         if(orden.size()>0){
+            
+            for (String columna : orden) {
+                if(!tabla.IDs.contains(columna)){
+                    this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque una de las columnas definidas no existe");
+                    return (T)"error porque no existe la columna escogida";
+                }
+            }
             
 //            System.out.println("si hay lista de colunas!!!!");
 //            REVISAR QUE EL NUMERO DE COLUMNAS Y EL DE VALORES COINCIDA
@@ -999,11 +1080,69 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
                 if(orden.contains(columna)){
                     int indice=orden.indexOf(columna);
-                    String val=valores.get(i);
-                    String nombreColumnaXinsertar=orden.get(i);
+                    String val=valores.get(indice);
+//                    System.out.println("val->"+val);
+                    String nombreColumnaXinsertar=orden.get(indice);
                     String tipoColumnaXinsertar=val.substring(0,val.indexOf("-"));
                     String valorColumnaXinsertar=val.substring(val.indexOf("-")+1);
                     String tipoColumnaEsperado = columnas.get(nombreColumnaXinsertar);
+                    int tamano=0;
+                    if(tipoColumnaEsperado.contains("char")){
+                        tamano=Integer.parseInt(tipoColumnaEsperado.substring(tipoColumnaEsperado.indexOf("(")+1, tipoColumnaEsperado.indexOf(")")));
+                        tipoColumnaEsperado="char";
+                        
+                    }
+                    
+//                    REVISAR SI LA COLUMNA QUE VOY A INSERTAR ES PRIMARY KEY
+                    if( tabla.CheckPK() ){
+                        
+                        if(registros!=null){
+                            
+//                        HACER UNA COMPARACION CORRECTA EN CASO DE QUE SEAN VARIAS COLUMNAS
+                            if(tabla.PkS.PkColumns.size()>1){
+                                 int numMagico=tabla.PkS.PkColumns.size();
+                                for (HashMap fila : registros.getLista()) {
+                                    for (Object llaves : fila.keySet()) {
+                                        System.out.print(llaves+",");
+                                    }
+                                    System.out.println("");
+                                    int cont=0;
+                                    int j=0;
+                                    String elFallo="";
+                                    for (String columnaPk : tabla.PkS.PkColumns) {
+                                        int indixPk=orden.indexOf(columnaPk);
+                                        String elValors = valores.get(indixPk).substring(val.indexOf("-")+1);
+                                        System.out.println(fila.get(columnaPk)+" <-> "+elValors);
+                                        if(fila.get(columnaPk).equals(elValors)){
+                                            elFallo+=elValors+",";
+                                            cont++;
+                                        }else{
+                                            break;
+                                        }
+                                        
+                                    }
+                                    if(cont==numMagico){
+                                        this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque los valores de la PRIMARY KEY  ("+elFallo+") ya existen ");
+                                        return(T)"";
+                                    }
+                                    
+                                }
+                            }else{
+                                
+                                for (HashMap fila : registros.getLista()) {
+                                    if(fila.get(columna).equals(valorColumnaXinsertar)){
+                                        this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el valor:" +columna+"="+valorColumnaXinsertar+" ya existe en la tabla");
+                                        return (T)"error al insertar valor duplicado por PK";
+                                    }
+                                }
+
+                            }
+                        }
+
+                        
+                    }
+                    
+                    
 
 //                    REVISAR SI EL TIPO DE LOS VALORES X INSERTAR COINCIDE CON EL ESPERADO
 
@@ -1017,6 +1156,9 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                                     break;
                                 case "int":
                                     tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar);
+                                    break;
+                                case("null"):
+                                    tmp.put(nombreColumnaXinsertar,"");
                                     break;
                                 default:
                                     if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
@@ -1036,6 +1178,9 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                                 case "int":
                                     tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar+".0");
                                     break;
+                                case("null"):
+                                    tmp.put(nombreColumnaXinsertar,"");
+                                    break;
                                 default:
                                     if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
                                         this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tipo de "+valorColumnaXinsertar+" es: ("+tipoColumnaXinsertar+") y esperaba: ("+tipoColumnaEsperado+")");
@@ -1044,6 +1189,14 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                                     break;
                             }
 
+                            break;
+                            
+                        case("char"):
+                            if(valorColumnaXinsertar.length()>tamano){
+                                this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el tamaño del char encontrado es: ("+valorColumnaXinsertar.length()+") y esperaba como max: ("+tamano+")");
+                                return (T)"error porque no el tamano del char es muy grande";
+                            }
+                            tmp.put(nombreColumnaXinsertar, valorColumnaXinsertar);
                             break;
                         default:
                             if(!tipoColumnaXinsertar.equals(tipoColumnaEsperado)){
@@ -1109,7 +1262,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
 
     @Override
     public T visitFecha(GramaticaParser.FechaContext ctx) {
-        System.out.println("FECHA VISITADA->"+ctx.getText());
+//        System.out.println("FECHA VISITADA->"+ctx.getText());
         
        
 //        OBTENER LOS NUMEROS DE LA FECHA INGRESADA
@@ -1184,6 +1337,15 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         t+=ctx.getText();
         return (T)t;
     }
+
+    @Override
+    public T visitNullo(GramaticaParser.NulloContext ctx) {
+        String t="null-";
+        t+="!!";
+        return (T) t;//To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 
     
 /****************************************************************************************************
@@ -1691,5 +1853,21 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         return arc;
     }
     
-    
+    private void escribirMD(){
+        File file= new File(dirBase+"\\metaData_GENERAL.json");
+        file.delete();
+        try {
+            file.createNewFile();
+        } catch (IOException ex) {
+            Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        for (DataBase value : this.bases.values()) {
+            try {
+                this.addToMDGeneral(value);
+            } catch (IOException ex) {
+                Logger.getLogger(NuestroVisitor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }
+    }
 }

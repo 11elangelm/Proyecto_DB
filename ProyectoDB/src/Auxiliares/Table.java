@@ -36,7 +36,7 @@ public class Table {
         this.nombre=name;
         this.IDs = IDs;
         this.Tipos = Tipos;
-        llenarMapa();
+        //llenarMapa();
     }
     public Table(String name, ArrayList<String> IDs, ArrayList<String> Tipos, PkConstraint PkS, ArrayList<FkConstraint> FkS, ArrayList<ChConstraint> ChK)
     {
@@ -47,7 +47,7 @@ public class Table {
         this.Pk = true;
         this.FkS = FkS;
         this.ChK = ChK;
-        llenarMapa();
+        //llenarMapa();
     }
     public void setPkS(PkConstraint PkS)
     {
@@ -163,8 +163,10 @@ public class Table {
 
     @Override
     public String toString() {
-        return "Table{" + "IDs=" + IDs + ", Tipos=" + Tipos + ", nombre=" + nombre + '}';
+        return "Table{" + "cantRegistros=" + cantRegistros + ", nombre=" + nombre + ", Pk=" + Pk + ", PkS=" + PkS.toString() + ", FkS=" + FkS.toString() + ", ChK=" + ChK.toString() + ", columnas=" + columnas + '}';
     }
+
+    
     
     
     

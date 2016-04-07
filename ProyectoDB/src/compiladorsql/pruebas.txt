@@ -178,3 +178,37 @@ drop table recibo;
 CREATE TABLE cliente (id int , CONSTRAINT pkCliente PRIMARY KEY  (id) );
 CREATE TABLE recibo (idCliente int, idProducto int, totalCompra float,id int);
 ALTER TABLE recibo ADD CONSTRAINT fkReciboClie FOREIGN KEY (idCliente) REFERENCES cliente(id);
+
+
+
+drop database pruebas;
+create database pruebas;
+use database pruebas;
+//drop table cliente;
+//drop table recibo;
+CREATE TABLE cliente (id int , CONSTRAINT pkCliente PRIMARY KEY  (id) );
+CREATE TABLE recibo (idCliente int, idProducto int, totalCompra float,id int);
+ALTER TABLE recibo ADD CONSTRAINT fkReciboClie FOREIGN KEY (idCliente) REFERENCES cliente(id);
+
+create table keys (nombre int, ids id, constraint pkks primary key (ids), constraint fkks foreign key (nombre) references cliente(id))
+
+
+
+use database pruebas;
+drop table cliente;
+drop table keys;
+CREATE TABLE cliente (id int , CONSTRAINT pkCliente PRIMARY KEY  (id) );
+create table keys (nombre int, ids id, constraint pkks primary key (ids), constraint fkks foreign key (nombre) references cliente(id))
+
+use database pruebas;
+//drop table todos;
+//create table todos (edad int, nombre char(12), id int);
+//alter table todos drop constraint pkTodos ;
+//alter table todos add constraint pkTodos primary key (edad,id) ;
+//alter table todos drop constraint pkTodos;
+//alter table todos add column nac date;
+//alter table todos add constraint pkTodos primary key (nac ,id);
+//insert into todos (nacimiento,edad,salario,nombre) values ('1994-06-18',14,18.64,'juan');
+insert into todos(id, nac,edad,nombre) values (2,'2007-04-18',21,'angel');
+
+//show columns from todos

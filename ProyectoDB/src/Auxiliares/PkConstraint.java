@@ -23,4 +23,11 @@ public class PkConstraint
         this.PkColumns = PkColumns;
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "PkConstraint{" + "PkColumns=" + PkColumns + ", name=" + name + '}';
+    }
+    
+    
 }

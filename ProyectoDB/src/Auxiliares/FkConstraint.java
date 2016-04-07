@@ -32,7 +32,7 @@ public class FkConstraint
 
     @Override
     public String toString() {
-        return "FkConstraint{" + "name=" + name + ", FkColumnsSource=" + FkColumnsSource + ", FkColumnsDestiny=" + FkColumnsDestiny + '}';
+        return "FkConstraint{" + "name=" + name + ", FkColumnsSource=" + FkColumnsSource.toString() + ", FkColumnsDestiny=" + FkColumnsDestiny.toString() + '}';
     }
 
     

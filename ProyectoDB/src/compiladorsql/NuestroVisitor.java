@@ -8,6 +8,7 @@ package compiladorsql;
 import Auxiliares.ChConstraint;
 import Auxiliares.ContenidoTabla;
 import Auxiliares.DataBase;
+import Auxiliares.Date;
 import Auxiliares.FkConstraint;
 import Auxiliares.MakeClass;
 import Auxiliares.PkConstraint;
@@ -95,7 +96,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         this.tablasActuales=new HashMap();
         this.registrosTablasActuales=new HashMap();
         this.bases=new HashMap();
-        
+        System.out.println("--");
         this.cargarBases();
         long startTime = System.nanoTime();
 
@@ -1085,6 +1086,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                     String nombreColumnaXinsertar=orden.get(indice);
                     String tipoColumnaXinsertar=val.substring(0,val.indexOf("-"));
                     String valorColumnaXinsertar=val.substring(val.indexOf("-")+1);
+                    
                     String tipoColumnaEsperado = columnas.get(nombreColumnaXinsertar);
                     int tamano=0;
                     if(tipoColumnaEsperado.contains("char")){
@@ -1099,51 +1101,96 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
                         if(registros!=null){
                             
 //                        HACER UNA COMPARACION CORRECTA EN CASO DE QUE SEAN VARIAS COLUMNAS
+                            
                             if(tabla.PkS.PkColumns.size()>1){
                                  int numMagico=tabla.PkS.PkColumns.size();
                                 for (HashMap fila : registros.getLista()) {
-                                    for (Object llaves : fila.keySet()) {
-                                        System.out.print(llaves+",");
-                                    }
-                                    System.out.println("");
                                     int cont=0;
                                     int j=0;
                                     String elFallo="";
                                     for (String columnaPk : tabla.PkS.PkColumns) {
                                         int indixPk=orden.indexOf(columnaPk);
-                                        String elValors = valores.get(indixPk).substring(val.indexOf("-")+1);
-                                        System.out.println(fila.get(columnaPk)+" <-> "+elValors);
-                                        if(fila.get(columnaPk).equals(elValors)){
-                                            elFallo+=elValors+",";
-                                            cont++;
+                                        String elValors = valores.get(indixPk);//.substring(val.indexOf("-")+1);
+                                        elValors=elValors.substring(elValors.indexOf("-"));
+                                        
+                                        if(tabla.Tipos.get(tabla.IDs.indexOf(columnaPk)).equals("date")){
+                                            
+                                            //System.out.println(elValors);
+                                            Date nd=new Date(Integer.parseInt(elValors.substring(2, 6)) ,
+                                                    Integer.parseInt(elValors.substring(7, 9)) , 
+                                                    Integer.parseInt(elValors.substring(10,12)) );
+                                            String elVal = (String) fila.get(columnaPk);
+                                            
+                                            Date nd2;
+                                            if(!elVal.equals("")){
+                                                nd2=new Date(Integer.parseInt(elVal.substring(1, 5)) ,
+                                                Integer.parseInt(elVal.substring(6, 8)) , 
+                                                Integer.parseInt(elVal.substring(9,11)) );
+                                            }else{
+                                                nd2=new Date(9999,13,32);
+                                            }
+                                            
+                                            
+                                            if(nd.compareTo(nd2)==0){
+                                                
+                                                elFallo+=elValors+",";
+                                                cont++;
+                                            }else{
+                                                
+                                                break;
+                                            }
                                         }else{
-                                            break;
+                                            if(fila.get(columnaPk).equals(elValors)){
+                                                
+                                                elFallo+=elValors+",";
+                                                cont++;
+                                            }else{
+                                                break;
+                                            }
                                         }
                                         
                                     }
                                     if(cont==numMagico){
-                                        this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque los valores de la PRIMARY KEY  ("+elFallo+") ya existen ");
+                                        this.errores.add("La linea:"+ctx.start.getLine()+" , no puede insertar en la tabla ("+nameTabla+") porque los valores de la PRIMARY KEY  ("+elFallo+") ya existen ");
                                         return(T)"";
                                     }
                                     
                                 }
                             }else{
-                                
                                 for (HashMap fila : registros.getLista()) {
                                     if(fila.get(columna).equals(valorColumnaXinsertar)){
                                         this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque el valor:" +columna+"="+valorColumnaXinsertar+" ya existe en la tabla");
                                         return (T)"error al insertar valor duplicado por PK";
                                     }
                                 }
-
                             }
                         }
-
-                        
                     }
+//                    REVISAR LOS VALORES DE LAS FOREIGN KEYS
                     
-                    
-
+                    if(tabla.FkS.size()>0){
+                        for (FkConstraint constraint : tabla.FkS) {
+                            
+                            Table tb=constraint.references;
+                            ArrayList<String>noms=new ArrayList();
+                            for (String columnaNameXjustificar : constraint.FkColumnsSource) {
+                                if(tb.IDs.contains(columnaNameXjustificar)){
+                                    noms.add(columnaNameXjustificar);
+                                }
+                            }
+                            
+                            ContenidoTabla regist = this.registrosTablasActuales.get(tb.getNombre());
+                            if(regist!=null){
+                                int ct=0;
+                                for (HashMap fila : regist.getLista()) {
+                                    for (String nombreCol : noms) {
+                                        String valor = (String) fila.get(fila);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                
 //                    REVISAR SI EL TIPO DE LOS VALORES X INSERTAR COINCIDE CON EL ESPERADO
 
 //                    EL SWITCH SE HACE XQ PUEDE EXISTIR LA CONVERSION FORZOSA EN LOS INT Y FLOAT
@@ -1224,7 +1271,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
         
         return (T)""; //To change body of generated methods, choose Tools | Templates.
     }
-
+        
     @Override
     public T visitTipoChar(GramaticaParser.TipoCharContext ctx) {
         String t="char("+ctx.NUM()+")";

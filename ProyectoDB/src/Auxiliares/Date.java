@@ -63,5 +63,11 @@ public class Date implements Comparable<Date>
         return 0;
     }
     
-    
+    public Date stringToDate(String date)
+    {
+        date = date.substring(1, date.length()-1);
+        String[] fecha = date.split("-");
+        Date aret = new Date(Integer.parseInt(fecha[0]), Integer.parseInt(fecha[1]), Integer.parseInt(fecha[2]));
+        return aret;
+    }
 }

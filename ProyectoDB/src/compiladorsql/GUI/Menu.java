@@ -257,7 +257,10 @@ public class Menu extends javax.swing.JFrame {
         int returnVal = this.jFileChooser1.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = this.jFileChooser1.getSelectedFile();
+            long startTime = System.nanoTime();
             try {
+                
+                
                 BufferedReader br=new BufferedReader(new FileReader(file.getPath()));
                 String s="",s1="";
                 this.txtAreaInput.setText("");
@@ -267,8 +270,15 @@ public class Menu extends javax.swing.JFrame {
                 if(br!=null){
                     br.close();
                 }
+                long estimatedTime = System.nanoTime() - startTime;
+                estimatedTime=(long) (estimatedTime*0.000001);
+                System.out.println("Tiempo para leer->"+estimatedTime+" ms");
+                startTime = System.nanoTime();
                 this.txtAreaInput.setText(s1);
                 lastPath=file.getAbsolutePath();
+                estimatedTime = System.nanoTime() - startTime;
+                estimatedTime=(long) (estimatedTime*0.000001);
+                System.out.println("Tiempo para mstrar->"+estimatedTime+" ms");
                 
             } catch (FileNotFoundException ex) {
                 JOptionPane.showMessageDialog(null,"El archivo que intenta abrir no existe","ERROR",JOptionPane.ERROR_MESSAGE);

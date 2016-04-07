@@ -26,6 +26,7 @@ public class Table {
     public PkConstraint PkS=new PkConstraint();
     public ArrayList<FkConstraint> FkS = new ArrayList<FkConstraint>();
     public ArrayList<ChConstraint> ChK = new ArrayList<ChConstraint>();
+    public ArrayList<expression> ColumnaCheck = new ArrayList<expression>();
     public HashMap<String,String> columnas = new HashMap();
     public HashMap<String, String> getColumnas() {
         return columnas;

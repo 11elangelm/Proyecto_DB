@@ -14,6 +14,7 @@ import Auxiliares.MakeClass;
 import Auxiliares.PkConstraint;
 import Auxiliares.Table;
 import Auxiliares.TableMaker;
+import Auxiliares.expression;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.awt.BorderLayout;
@@ -54,7 +55,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     private String dirBase="Bases de Datos\\",dirActual="";
     private ArrayList<String> errores=new ArrayList();
     public Gson Gsoneador = new Gson(); 
-            
+    public GramaticaParser parsero;
     public DataBase DBactual;
     private ArrayList<ArrayList<String>> metaDataLOCALTBcolumnas,
             metaDataLOCALTBtipos;
@@ -611,6 +612,10 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitConstraintCheck(GramaticaParser.ConstraintCheckContext ctx) 
     {
+        ParseTree Barbol = ctx.finalExpression().getChild(0).getParent();
+        expression checker = new expression(Barbol, this.parsero, this.ActualTable, ctx.ID().getText());
+        this.ActualTable.ColumnaCheck.add(checker);
+             
         return (T)"";
     }
 
@@ -1600,12 +1605,55 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
             }
             
             revVerb("revisar si tipo del valor es el mismo que el de la columna");
+            Table aInsertar = tablaXInsertar;
+            for(int i=0; i<aInsertar.ColumnaCheck.size(); i++)
+            {
+                expression chiquiador = aInsertar.ColumnaCheck.get(i);
+                if(chiquiador.checkValue(nuevoRegistro))
+                {
+                    registros.addRegistro(nuevoRegistro);
+                }
+                else
+                {
+                    this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede insertar en la tabla ("+nameTabla+") porque no cumple conla check constraint " + chiquiador.name);
+                    return (T)"error porque no coincide el tipo de columnas provistas para insertar con el tipo de valores para insertar";
+                }
+                        
+            }
+            //ParseTree Barbol = ctx.
             
-            registros.addRegistro(nuevoRegistro);
+            
         }
         
         return (T)""; //To change body of generated methods, choose Tools | Templates.
     }
+
+    /*
+    @Override
+    public T visitDelete(GramaticaParser.DeleteContext ctx) 
+    {
+        String TableName = ctx.ID().getText();
+        //ver si la tabla existe
+        if(this.tablasActuales.containsKey(TableName) == false)
+        {
+            this.errores.add("La linea:"+ctx.start.getLine()+", ("+ctx.getText()+"), no puede eliminar de la tabla ("+TableName+") porque la tabla no existe");
+            return (T)"error al intentar eliminar de una tabla existente";
+        }
+        //iterar sobre los HashMap de la tabla a eliminar
+        Table aEliminarReg = this.tablasActuales.get(TableName);
+        //instanciar el obj expression necesario;
+        ParseTree Barbol = ctx.finalExpression().getChild(0).getParent();
+        //expression checker = new expression(Barbol, parsero, aEliminarReg);
+        //Arra=
+        //for hashmaps
+        //if(expression.checkValue(hashmap)) --> eliminar; 
+        //eliminar los que cumplan la condicion
+        //return (T)"";
+    }
+    */
+    
+    
+    
         
     @Override
     public T visitTipoChar(GramaticaParser.TipoCharContext ctx) {

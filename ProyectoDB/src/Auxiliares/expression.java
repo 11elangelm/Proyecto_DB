@@ -19,13 +19,15 @@ public class expression
     public ParseTree Barbol;
     public GramaticaParser parsero;
     public Table tablon = new Table();
+    public String name;
     factor segundo;
     factor primero;
-    public expression(ParseTree exp, GramaticaParser parsero, Table tablon)
+    public expression(ParseTree exp, GramaticaParser parsero, Table tablon, String name)
     {
         this.tablon = tablon;
         this.Barbol = exp;
         this.parsero = parsero;
+        this.name = name;
     }
     public String NodeName(String PTFormat)
     {

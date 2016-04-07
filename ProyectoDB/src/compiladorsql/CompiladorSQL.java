@@ -38,7 +38,7 @@ public class CompiladorSQL {
         parser = new GramaticaParser(tokens);
         tree = parser.sqlProgram();
         mv= new NuestroVisitor();
-        
+        mv.parsero = parser;
         mv.setVerbose(vB);
         mv.visit(tree);
         

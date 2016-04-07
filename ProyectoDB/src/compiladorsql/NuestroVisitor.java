@@ -13,6 +13,7 @@ import Auxiliares.MakeClass;
 import Auxiliares.PkConstraint;
 import Auxiliares.Table;
 import Auxiliares.TableMaker;
+import Auxiliares.expression;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.awt.BorderLayout;
@@ -65,7 +66,7 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     private ArrayList<Table> metaDataActual;
     private HashMap<String,Table>tablasActuales;
     public TableMaker elCreador = new TableMaker();
-    
+    public GramaticaParser parsero;
     //tabla y constraints se inicializan y el objse arma al final
     public Table ActualTable;
     public Table ReferencedTable;
@@ -609,6 +610,11 @@ public class NuestroVisitor<T> extends GramaticaBaseVisitor{
     @Override
     public T visitConstraintCheck(GramaticaParser.ConstraintCheckContext ctx) 
     {
+        //nombre
+        String nombre = ctx.ID().getText();
+        ParseTree dekuTree = ctx.getChild(2);
+        expression nueva = new expression(dekuTree, this.parsero, this.ActualTable);
+        this.ActualTable.ChK.put(nombre, nueva);
         return (T)"";
     }
 

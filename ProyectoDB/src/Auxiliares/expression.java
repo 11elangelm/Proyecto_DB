@@ -140,6 +140,8 @@ public class expression
             CName = CName.substring(1, CName.length()-1);//sin parentesis
             String FinalName = TName + "_" + CName;
             type1 = tablon.columnas.get(FinalName);
+            String location = registro.get(FinalName);
+            primero = new factor(location);
         }
         //revisa el segundo valor
         if(Barbol.getChild(2).getChildCount() == 1)
@@ -179,6 +181,8 @@ public class expression
             CName = CName.substring(1, CName.length()-1);//sin parentesis
             String FinalName = TName + "_" + CName;
             type2 = tablon.columnas.get(FinalName);
+            String sabeers = registro.get(FinalName);
+            
             if(type2.equals("int"))
             {
             }

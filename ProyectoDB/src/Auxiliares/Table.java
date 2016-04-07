@@ -25,7 +25,7 @@ public class Table {
     public boolean Pk = false;
     public PkConstraint PkS=new PkConstraint();
     public ArrayList<FkConstraint> FkS = new ArrayList<FkConstraint>();
-    public ArrayList<ChConstraint> ChK = new ArrayList<ChConstraint>();
+    public HashMap<String, expression> ChK = new HashMap<String, expression>();
     public HashMap<String,String> columnas = new HashMap();
     public HashMap<String, String> getColumnas() {
         return columnas;
@@ -38,7 +38,7 @@ public class Table {
         this.Tipos = Tipos;
         //llenarMapa();
     }
-    public Table(String name, ArrayList<String> IDs, ArrayList<String> Tipos, PkConstraint PkS, ArrayList<FkConstraint> FkS, ArrayList<ChConstraint> ChK)
+    public Table(String name, ArrayList<String> IDs, ArrayList<String> Tipos, PkConstraint PkS, ArrayList<FkConstraint> FkS, HashMap<String, expression> ChK)
     {
         this.nombre = name;
         this.IDs = IDs;
